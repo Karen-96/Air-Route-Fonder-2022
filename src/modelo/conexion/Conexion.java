@@ -11,19 +11,20 @@ import java.sql.SQLException;
  */
 
 public class Conexion {
-	static final String bd = "aerolinea_argentina";
-	static final String login = "root";
-	static final String password = "123456789";
-	static final String url = "jdbc:mysql://localhost:3305/aerolinea_argentina";
+	static  String bd = "aerolinea_argentina";
+	static  String login = "root";
+	static  String password = "123456789";
+	static  String url = "jdbc:mysql://localhost:3305/"+bd;
 	Connection conn = null;
 	
-	/** Constructor de DbConnection */
-	public Conexion() {
+
+	   /** Constructor de DbConnection */
+	   public Conexion() {
 	      try{
 	         //obtenemos el driver de para mysql
 	         Class.forName("com.mysql.cj.jdbc.Driver");
 	         //obtenemos la conexión
-	         conn = (Connection) DriverManager.getConnection(url,login,password);
+	         conn = DriverManager.getConnection(url,login,password);
 
 	         if (conn!=null){
 	            System.out.println("Conección a base de datos "+bd+" OK");
@@ -37,14 +38,26 @@ public class Conexion {
 	         System.out.println(e);
 	      }
 	   }
-	
-	 /**Permite retornar la conexión*/
-	 public Connection getConnection(){
+	   /**Permite retornar la conexión*/
+	   public Connection getConnection(){
 	      return conn;
-	 }
+	   }
 
-	 public void desconectar(){
+	   public void desconectar(){
 	      conn = null;
-	 }
+	   }
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 }

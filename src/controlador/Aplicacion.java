@@ -1,13 +1,15 @@
 package controlador;
 
-import modelo.Logica;
+import modelo.LogicaAeropuerto;
+import modelo.LogicaVuelo;
 import vista.PanelCargarAeopuertos;
 import vista.PanelCargarVuelos;
 import vista.VentanaMenu;
 
 public class Aplicacion {
 	
-	private Logica logica;
+	private LogicaAeropuerto logicaAeropuerto;
+	private LogicaVuelo logicaVuelo;
 	private VentanaMenu ventanaMenu;
 	private PanelCargarAeopuertos cargarAeropuertos;
 	private PanelCargarVuelos cargarVuelos;	
@@ -26,7 +28,8 @@ public class Aplicacion {
 		/*Se instancian las clases*/
 		coordinador = new Coordinador();
 		ventanaMenu = new VentanaMenu();
-		logica= new Logica();
+		logicaAeropuerto= new LogicaAeropuerto();
+		logicaVuelo = new LogicaVuelo();
 		cargarAeropuertos = new PanelCargarAeopuertos();
 		cargarVuelos = new PanelCargarVuelos();
 		
@@ -34,15 +37,16 @@ public class Aplicacion {
 		ventanaMenu.setCoordinador(coordinador);
 		cargarAeropuertos.setCoordinador(coordinador);
 		cargarVuelos.setCoordinador(coordinador);
-		logica.setCoordinador(coordinador);
+		logicaAeropuerto.setCoordinador(coordinador);
+		logicaVuelo.setCoordinador(coordinador);
 		
 		
 		/*Se establecen relaciones con la clase coordinador*/
 		coordinador.setVentanaMenu(ventanaMenu);
-		coordinador.setLogica(logica);
 		coordinador.setCargarAeropuertos(cargarAeropuertos);
 		coordinador.setCargarVuelos(cargarVuelos);
-		coordinador.setLogica(logica);
+		coordinador.setLogicaAeropuerto(logicaAeropuerto);
+		coordinador.setLogicaVuelo(logicaVuelo);
 		
 		
 		

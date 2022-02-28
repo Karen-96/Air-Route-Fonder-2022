@@ -41,7 +41,8 @@ public class VentanaMenu extends JFrame implements ActionListener{
 	
 	
 	public VentanaMenu() {
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setBounds(100, 100, 1270, 717);
 		setTitle("Air Route Finder");
 		panelMenu = new JPanel();
@@ -88,10 +89,17 @@ public class VentanaMenu extends JFrame implements ActionListener{
 		if (e.getSource()==btnCargarDatos) {
 			pestañas = new JTabbedPane();
 			pestañas.setBounds(0,0,1255,678);
-			cargarAeropuertos = new PanelCargarAeopuertos();
-			cargarVuelos = new PanelCargarVuelos();
+//			cargarAeropuertos = new PanelCargarAeopuertos();
+			cargarVuelos = coordinador.getCargarVuelos();
+			cargarVuelos.mostrarAeropuertosComboBox();;
+			cargarVuelos.completarTablaVuelos();
+			
+			cargarAeropuertos = coordinador.getCargarAeropuertos();
+			cargarAeropuertos.completarTablaAeropuerto();
+			
 			
 			pestañas.add("Aeropuertos",cargarAeropuertos);
+			pestañas.setFont(new Font("Arial", Font.PLAIN, 20));
 			pestañas.add("Vuelos",cargarVuelos);
 			panelMenu.removeAll();
 			panelMenu.add(pestañas);

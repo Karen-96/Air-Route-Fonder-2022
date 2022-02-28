@@ -5,8 +5,7 @@ public class AeropuertoVo {
 	private int idAeropuerto;
 	private String abreviacion;
 	private String nombre;
-	
-	
+
 	public int getIdAeropuerto() {
 		return idAeropuerto;
 	}

@@ -1,24 +1,35 @@
 package controlador;
 
-import modelo.Logica;
+import java.util.List;
+
+import modelo.LogicaAeropuerto;
+import modelo.LogicaVuelo;
 import modelo.vo.AeropuertoVo;
+import modelo.vo.VueloVo;
 import vista.PanelCargarAeopuertos;
 import vista.PanelCargarVuelos;
 import vista.VentanaMenu;
 
 public class Coordinador {
 	
-	private Logica logica;
+	private LogicaAeropuerto logicaAeropuerto;
+	private LogicaVuelo logicaVuelo;
 	private VentanaMenu ventanaMenu;
 	private PanelCargarAeopuertos cargarAeropuertos;
 	private PanelCargarVuelos cargarVuelos;
 	
 	
-	public Logica getLogica() {
-		return logica;
+	public LogicaAeropuerto getLogicaAeropuerto() {
+		return logicaAeropuerto;
 	}
-	public void setLogica(Logica logica) {
-		this.logica = logica;
+	public void setLogicaAeropuerto(LogicaAeropuerto logicaAeropuerto) {
+		this.logicaAeropuerto = logicaAeropuerto;
+	}
+	public LogicaVuelo getLogicaVuelo() {
+		return logicaVuelo;
+	}
+	public void setLogicaVuelo(LogicaVuelo logicaVuelo) {
+		this.logicaVuelo = logicaVuelo;
 	}
 	public VentanaMenu getVentanaMenu() {
 		return ventanaMenu;
@@ -44,16 +55,28 @@ public class Coordinador {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	
-	public void mostrarPanelCargaDatos() {
-		
-		
-		
+	public void mostrarVentanaMenu() {
+		ventanaMenu.setVisible(true);
 	}
-	public void registrarAeropuerto(AeropuertoVo aeropuertoVo) {
-		System.out.println(aeropuertoVo);
-		//logica.validarRegistroAeropuerto(aeropuertoVo);
+	/*
+	public boolean registrarAeropuerto(AeropuertoVo aeropuertoVo) {
+		return logica.validarRegistroAeropuerto(aeropuertoVo);
 		
 	}
 	
+	public List<AeropuertoVo> obtenerAeropuertosAll() {				
+		return logica.validarConsultaAeropuerto();
+	}
 
+	public boolean actualizarAeropuerto(AeropuertoVo aeropuertoVo, String abreviacion, String nombre) {
+		return logica.validarModificacion(aeropuertoVo, abreviacion, nombre);
+	}
+	
+	public boolean registrarVuelo(VueloVo vuelovo) {
+		return logica.validarRegistroVuelo(vuelovo);
+	}
+	public List<VueloVo> obtenerVuelosAll() {
+		return logica.validarConsultaVuelos();
+	}
+	*/
 }
