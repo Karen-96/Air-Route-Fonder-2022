@@ -9,9 +9,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -45,7 +48,7 @@ import javax.swing.JFormattedTextField;
 
 public class PanelCargarVuelos extends JPanel implements ActionListener{
 	 
-	private static Coordinador coordinador = new Coordinador(); // objeto miCoordinador que permite la relacion entre las clases
+	private static Coordinador coordinador = new Coordinador(); // objeto miCoordinador que permite la relacion entre esta clase y la clase coordinador
 	private String hora = "^(?:0?[1-9]|1[0-2]):[0-5][0-9]\\s?(?:[aApP](\\.?)[mM]\\1)?"; //expresion regular para los campos de hora
 	private JPanel panel;
 	private JComboBox comboBoxAeropuertosOrigen;
@@ -67,8 +70,8 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 	private JDateChooser dateFechaHora;
 
 	private Pattern pattern; // Patron para expresion regular
-	private Border wrongBorder = BorderFactory.createLineBorder(Color.RED);
-	private Border validateBorder = BorderFactory.createLineBorder(Color.GREEN);
+	private Border wrongBorder;
+	private Border validateBorder;
 	private Border defaultBorder;
 	private JSpinner intPrecio;
 	private JLabel lblTiempoVuelo;
@@ -80,10 +83,23 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 	private JLabel lblNumeroVuelo;
 	private JTextField textNumeroVuelo;
 	
+	private SimpleDateFormat dateFormat;
+	private List<AeropuertoVo> listaAeropuertos;
+	private JButton btnVolver;
+	
 	/**
 	 * Create the panel.
 	 */
 	public PanelCargarVuelos() {
+		dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+		listaAeropuertos = new ArrayList<>();
+		wrongBorder = BorderFactory.createLineBorder(Color.RED);
+		validateBorder = BorderFactory.createLineBorder(Color.GREEN);
+		model = new DefaultTableModel();
+		iniciarComponentes();
+	}
+	
+	public void iniciarComponentes() {
 		setBounds(0, 0, 1145, 678);
 		setLayout(null);
 		panel = new JPanel();
@@ -163,11 +179,27 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 			public void mouseClicked(MouseEvent e) {
 				int fila = tableVuelos.getSelectedRow();
 				textNumeroVuelo.setText(model.getValueAt(fila, 0).toString());
-				dateFechaHora.setDate((Date) model.getValueAt(fila, 1));
-				
-				//Falta arreglar que aparesca en los campos de aeropuertos				
-			    comboBoxAeropuertosOrigen.setSelectedItem(model.getValueAt(fila, 2));
-				comboBoxAeropuertosDestino.setSelectedItem(model.getValueAt(fila, 3));
+				try {
+					dateFechaHora.setDate((Date) dateFormat.parse((String) model.getValueAt(fila, 1)));
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}				
+				//Busca la abreviacion en la lista de los aeropuertos y guarda el nombre para mostrar en el comboBox	
+				AeropuertoVo aeropuertoOrgn = null;
+				AeropuertoVo aeropuertoDest = null;
+				String aeropuertoOrigen = (String) model.getValueAt(fila, 2); 
+				String aeropuertoDestino = (String) model.getValueAt(fila, 3); 
+				for (AeropuertoVo aeropuertoVo : listaAeropuertos) {					
+					if (aeropuertoVo.getAbreviacion().equals(aeropuertoOrigen.trim())) {
+						aeropuertoOrgn = aeropuertoVo;
+					}					
+					if (aeropuertoVo.getAbreviacion().equals(aeropuertoDestino.trim())) {
+						aeropuertoDest = aeropuertoVo;
+					}									
+				}				
+			    comboBoxAeropuertosOrigen.setSelectedItem(aeropuertoOrgn.getAbreviacion()+" - "+aeropuertoOrgn.getNombre());
+				comboBoxAeropuertosDestino.setSelectedItem(aeropuertoDest.getAbreviacion()+" - "+aeropuertoDest.getNombre());
 				intPrecio.setValue(model.getValueAt(fila, 4));
 				horaTiempoVuelo.setValue(model.getValueAt(fila, 5));
 				horaDemora.setValue(model.getValueAt(fila, 6));
@@ -177,7 +209,6 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 		tableVuelos.setFont(new Font("Arial", Font.PLAIN, 15));
 		tableVuelos.setBackground(new Color(240, 248, 255));
 		tableVuelos.setRowHeight(25);
-		model = new DefaultTableModel();
 		Object[] column = { "N° Vuelo","Fecha y Hora Salida", "Aeropuerto Origen", "Aeropuerto Destino", "Precio", "Tiempo Vuelo", "Demora" };
 		Object[] row = new Object[0];
 		model.setColumnIdentifiers(column);
@@ -192,6 +223,7 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 		
 		btnModificar = new JButton("Modificar");
 		btnModificar.setBounds(1112, 115, 89, 23);
+		btnModificar.addActionListener(this);
 		panel.add(btnModificar);
 		
 		btnEliminar = new JButton("Eliminar");
@@ -288,9 +320,13 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 		JSeparator separator_1_1 = new JSeparator();
 		separator_1_1.setBounds(44, 196, 1024, 4);
 		panel.add(separator_1_1);
-
+		
+		btnVolver = new JButton("Volver");
+		btnVolver.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		btnVolver.setBounds(44, 23, 97, 23);
+		btnVolver.addActionListener(this);
+		panel.add(btnVolver);
 	}
-	
 	
 	
 	
@@ -305,9 +341,10 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 		
 		List<VueloVo> listaVuelos = coordinador.getLogicaVuelo().validarConsultaVuelos();
 		Object[] fila = new Object[tableVuelos.getModel().getColumnCount()]; // filas con 2 columnas
-		for (int i = 0; i < listaVuelos.size(); i++) {
+		
+		for (int i = 0; i < listaVuelos.size(); i++) {				
 			fila[0] = listaVuelos.get(i).getNumero_vuelo();
-			fila[1] = listaVuelos.get(i).getFecha();
+			fila[1] = dateFormat.format(listaVuelos.get(i).getFecha());
 			fila[2] = listaVuelos.get(i).getAeropuerto_origen();
 			fila[3] = listaVuelos.get(i).getAeropuerto_destino();
 			fila[4]= listaVuelos.get(i).getPrecio();
@@ -324,7 +361,7 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 	}
 	
 	public void mostrarAeropuertosComboBox() {
-		List<AeropuertoVo> listaAeropuertos = coordinador.getLogicaAeropuerto().validarConsultaAeropuerto();
+		listaAeropuertos = coordinador.getLogicaAeropuerto().validarConsultaAeropuerto();
 		for (int i = 0; i<listaAeropuertos.size(); i++) {
 			comboBoxAeropuertosOrigen.addItem(listaAeropuertos.get(i).getAbreviacion()+" - "+listaAeropuertos.get(i).getNombre());
 			comboBoxAeropuertosDestino.addItem(listaAeropuertos.get(i).getAbreviacion()+" - "+listaAeropuertos.get(i).getNombre());			
@@ -341,8 +378,7 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 		dateFechaHora.setDate(null);
 		intPrecio.setValue(0);
 		horaTiempoVuelo.setText("00:00");
-		horaDemora.setText("00:00");
-		
+		horaDemora.setText("00:00");		
 	}
 	
 	
@@ -411,7 +447,51 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 				
 			}else {
 				JOptionPane.showMessageDialog(null, "Por favor seleccione una fila");
-			}
+			}			
+		}
+		if(e.getSource()==btnModificar) {
+			int fila = tableVuelos.getSelectedRow();
+			if (fila>=0) {
+				String numero_vuelo_viejo = (String) tableVuelos.getValueAt(tableVuelos.getSelectedRow(), 0);
+				//Obtengo el nuevo aeropuerto origen seleccionado del comboBox
+				String origen = (String) comboBoxAeropuertosOrigen.getSelectedItem();
+				String[] parts = origen.split("-");
+				String origen_abreviacion_seleccionado = parts[0]; // abreviacion
+				
+				//Obtengo el nuevo aeropuerto destino seleccionado del comboBox
+				String destino = (String) comboBoxAeropuertosDestino.getSelectedItem();
+				String[] parts2 = destino.split("-");
+				String destino_abreviacion_seleccionado = parts2[0]; // abreviacion
+				
+				VueloVo vueloVo = new VueloVo();
+				vueloVo.setNumero_vuelo(textNumeroVuelo.getText());
+				
+				Date date = dateFechaHora.getDate();
+				long d = date.getTime();
+				java.sql.Timestamp fecha = new java.sql.Timestamp(d);
+				//System.out.println(fecha);
+				vueloVo.setFecha(fecha);
+				vueloVo.setAeropuerto_origen(origen_abreviacion_seleccionado);
+				vueloVo.setAeropuerto_destino(destino_abreviacion_seleccionado);
+				vueloVo.setPrecio((int) intPrecio.getValue());
+				vueloVo.setTiempo_vuelo(horaTiempoVuelo.getText());
+				vueloVo.setDemora(horaDemora.getText());
+				boolean verificacion = coordinador.getLogicaVuelo().validarModificacion(vueloVo,numero_vuelo_viejo);
+				if (verificacion) {
+					// Si se registro se refresca la tabla
+					completarTablaVuelos();
+				}
+				limpiar(); 
+				
+			} else {
+				JOptionPane.showMessageDialog(null, "Por favor seleccione una fila");
+			}				
+		}
+		if(e.getSource()==btnVolver) {
+			coordinador.getVentanaMenu().getPanelMenu().removeAll(); 
+			coordinador.getVentanaMenu().getPanelMenu().add(coordinador.getPanelMenu());
+			coordinador.getVentanaMenu().getPanelMenu().revalidate();
+			coordinador.getVentanaMenu().getPanelMenu().repaint();
 			
 		}
 		

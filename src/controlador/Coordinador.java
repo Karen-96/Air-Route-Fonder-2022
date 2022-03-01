@@ -1,13 +1,10 @@
 package controlador;
 
-import java.util.List;
-
 import modelo.LogicaAeropuerto;
 import modelo.LogicaVuelo;
-import modelo.vo.AeropuertoVo;
-import modelo.vo.VueloVo;
 import vista.PanelCargarAeopuertos;
 import vista.PanelCargarVuelos;
+import vista.PanelMenu;
 import vista.VentanaMenu;
 
 public class Coordinador {
@@ -17,6 +14,7 @@ public class Coordinador {
 	private VentanaMenu ventanaMenu;
 	private PanelCargarAeopuertos cargarAeropuertos;
 	private PanelCargarVuelos cargarVuelos;
+	private PanelMenu panelMenu;
 	
 	
 	public LogicaAeropuerto getLogicaAeropuerto() {
@@ -51,8 +49,17 @@ public class Coordinador {
 		this.cargarVuelos = cargarVuelos;
 	}
 	
+	public PanelMenu getPanelMenu() {
+		return panelMenu;
+	}
+	public void setPanelMenu(PanelMenu panelMenu) {
+		this.panelMenu = panelMenu;
+	}
+	
+	
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
 	
 	
 	public void mostrarVentanaMenu() {

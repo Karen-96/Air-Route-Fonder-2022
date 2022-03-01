@@ -1,6 +1,7 @@
 package modelo.dao;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,14 +23,14 @@ import modelo.vo.VueloVo;
  *
  */
 
-public class VueloDao {	
+public class VueloDao {
 
 	public void registrarVuelo(VueloVo vuelo) {
 		System.out.println(vuelo.getPrecio());
-				
-		//fecha que selecciona el usuario
-		////Timestamp fecha = (Timestamp) vuelo.getFecha();
-		
+
+		// fecha que selecciona el usuario
+		//// Timestamp fecha = (Timestamp) vuelo.getFecha();
+
 		Conexion conexion = new Conexion();
 		PreparedStatement ps;
 		String sql;
@@ -37,8 +38,11 @@ public class VueloDao {
 		try {
 			Statement estatuto = conexion.getConnection().createStatement();
 
-			estatuto.executeUpdate("INSERT INTO vuelo(numero_vuelo,fecha,precio,aeropuerto_origen,aeropuerto_destino,tiempo_vuelo,demora) VALUES ('"
-					+ vuelo.getNumero_vuelo() + "', '"	+ vuelo.getFecha() + "', '" + vuelo.getPrecio() + "', '"  + vuelo.getAeropuerto_origen()+ "', '" + vuelo.getAeropuerto_destino()+"', '" + vuelo.getTiempo_vuelo()+"', '" + vuelo.getDemora()+ "')");
+			estatuto.executeUpdate(
+					"INSERT INTO vuelo(numero_vuelo,fecha,precio,aeropuerto_origen,aeropuerto_destino,tiempo_vuelo,demora) VALUES ('"
+							+ vuelo.getNumero_vuelo() + "', '" + vuelo.getFecha() + "', '" + vuelo.getPrecio() + "', '"
+							+ vuelo.getAeropuerto_origen() + "', '" + vuelo.getAeropuerto_destino() + "', '"
+							+ vuelo.getTiempo_vuelo() + "', '" + vuelo.getDemora() + "')");
 			JOptionPane.showMessageDialog(null, "Se ha registrado Exitosamente", "Información",
 					JOptionPane.INFORMATION_MESSAGE);
 			estatuto.close();
@@ -46,9 +50,15 @@ public class VueloDao {
 
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
-			JOptionPane.showMessageDialog(null, "No se Registro los datos");
+			if(e.getMessage().contains("UNIQUE")) {
+				JOptionPane.showMessageDialog(null, "El N° vuelo ya esta registrado");
+				
+			}else {
+				JOptionPane.showMessageDialog(null, "No se Registro los datos");
+			}
+			
 		}
-		
+
 	}
 
 	public List<VueloVo> obtenerVuelosAll() {
@@ -75,23 +85,52 @@ public class VueloDao {
 			JOptionPane.showMessageDialog(null, "Error, no se conecto");
 			System.out.println(e);
 		}
-		return listaVuelos;		
+		return listaVuelos;
 	}
 
 	public void eliminarVuelo(String numero_vuelo) {
-		Conexion conex= new Conexion();
+		Conexion conex = new Conexion();
 		try {
 			Statement estatuto = conex.getConnection().createStatement();
-			estatuto.executeUpdate("DELETE FROM vuelo WHERE numero_vuelo='"+numero_vuelo+"'");
-			  JOptionPane.showMessageDialog(null, " Se ha Eliminado Correctamente","Información",JOptionPane.INFORMATION_MESSAGE);
-				estatuto.close();
-				conex.desconectar();
-			
+			estatuto.executeUpdate("DELETE FROM vuelo WHERE numero_vuelo='" + numero_vuelo + "'");
+			JOptionPane.showMessageDialog(null, " Se ha Eliminado Correctamente", "Información",
+					JOptionPane.INFORMATION_MESSAGE);
+			estatuto.close();
+			conex.desconectar();
+
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			JOptionPane.showMessageDialog(null, "No se Elimino el Aeropuerto");
 		}
-		
-		
+
+	}
+
+	public void modificarVuelo(VueloVo vuelo, String numero_vuelo) {
+		Conexion conex = new Conexion();
+		try {
+
+			String consulta = "UPDATE vuelo SET  numero_vuelo= ?, fecha = ?, precio = ?, aeropuerto_origen = ?, aeropuerto_destino = ?, tiempo_vuelo = ?, demora = ?  "
+					+ "WHERE numero_vuelo= ? ";
+			PreparedStatement estatuto = conex.getConnection().prepareStatement(consulta);
+			estatuto.setString(1, vuelo.getNumero_vuelo());
+			estatuto.setTimestamp(2, vuelo.getFecha());
+			estatuto.setInt(3, vuelo.getPrecio());
+			estatuto.setString(4,vuelo.getAeropuerto_origen());
+			estatuto.setString(5,vuelo.getAeropuerto_destino());
+			estatuto.setString(6,vuelo.getTiempo_vuelo());
+			estatuto.setString(7, vuelo.getDemora());
+			estatuto.setString(8, numero_vuelo);
+			
+			estatuto.executeUpdate();
+
+			JOptionPane.showMessageDialog(null, " Se ha Modificado Correctamente el Aeropuerto ", "Confirmación",
+					JOptionPane.INFORMATION_MESSAGE);
+
+		} catch (SQLException e) {
+			System.out.println(e);
+			JOptionPane.showMessageDialog(null, "Error al Modificar el Aeropuerto", "Error", JOptionPane.ERROR_MESSAGE);
+			e.getStackTrace();
+		}
+
 	}
 }

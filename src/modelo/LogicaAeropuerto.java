@@ -6,7 +6,6 @@ import javax.swing.JOptionPane;
 
 import controlador.Coordinador;
 import modelo.dao.AeropuertoDao;
-import modelo.dao.VueloDao;
 import modelo.vo.AeropuertoVo;
 
 public class LogicaAeropuerto {
