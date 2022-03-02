@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -22,7 +23,7 @@ import javax.swing.table.TableColumn;
 import controlador.Coordinador;
 import modelo.vo.AeropuertoVo;
 
-public class PanelCargarAeopuertos extends JPanel implements ActionListener {
+public class PanelCargarAeropuertos extends JPanel implements ActionListener {
 
 	private static Coordinador coordinador = new Coordinador(); // objeto miCoordinador que permite la relacion entre
 	private JPanel panel;
@@ -42,11 +43,21 @@ public class PanelCargarAeopuertos extends JPanel implements ActionListener {
 	private JLabel lblNewLabel_2;
 	private JTextField textBuscar;
 	private JButton btnBuscar;
+	private List<AeropuertoVo> listaAeropuertos;
+	AeropuertoVo aeropuertoVo;
+	
+	//Constructor
+	public PanelCargarAeropuertos() {
+		model = new DefaultTableModel();
+		listaAeropuertos = new ArrayList<>();
+		aeropuertoVo = new AeropuertoVo();
+		
+		iniciarComponentes();
 
-	/**
-	 * Create the panel.
-	 */
-	public PanelCargarAeopuertos() {
+	}
+	
+	//Inicia todos los componentes de la aplicacion	
+	public void iniciarComponentes() {
 		setBounds(0, 0, 1145, 678);
 		setLayout(null);
 
@@ -97,7 +108,7 @@ public class PanelCargarAeopuertos extends JPanel implements ActionListener {
 		tableAeropuertos.setRowHeight(25);
 		
 
-		model = new DefaultTableModel();
+		
 		Object[] column = { "Abreviacion", "Nombre del Aeropuerto" };
 		Object[] row = new Object[0];
 		model.setColumnIdentifiers(column);
@@ -105,7 +116,7 @@ public class PanelCargarAeopuertos extends JPanel implements ActionListener {
 		JScrollPaneAeropuertos.setViewportView(tableAeropuertos);
 
 		btnAgregar = new JButton("Agregar");
-		btnAgregar.setIcon(new ImageIcon(PanelCargarAeopuertos.class.getResource("/recursos/agregar.png")));
+		btnAgregar.setIcon(new ImageIcon(PanelCargarAeropuertos.class.getResource("/recursos/agregar.png")));
 		btnAgregar.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		btnAgregar.setBounds(40, 423, 151, 30);
 		btnAgregar.addActionListener(this);
@@ -116,7 +127,7 @@ public class PanelCargarAeopuertos extends JPanel implements ActionListener {
 		panel.add(btnAgregar);
 
 		btnModificar = new JButton("Modificar");
-		btnModificar.setIcon(new ImageIcon(PanelCargarAeopuertos.class.getResource("/recursos/Actualizar.png")));
+		btnModificar.setIcon(new ImageIcon(PanelCargarAeropuertos.class.getResource("/recursos/Actualizar.png")));
 		btnModificar.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		btnModificar.setBounds(229, 423, 174, 30);
 		btnModificar.addActionListener(this);
@@ -127,7 +138,7 @@ public class PanelCargarAeopuertos extends JPanel implements ActionListener {
 		panel.add(btnModificar);
 
 		btnEliminar = new JButton("Eliminar");
-		btnEliminar.setIcon(new ImageIcon(PanelCargarAeopuertos.class.getResource("/recursos/eliminarFila.png")));
+		btnEliminar.setIcon(new ImageIcon(PanelCargarAeropuertos.class.getResource("/recursos/eliminarFila.png")));
 		btnEliminar.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		btnEliminar.setBounds(413, 423, 151, 30);
 		btnEliminar.addActionListener(this);
@@ -149,7 +160,7 @@ public class PanelCargarAeopuertos extends JPanel implements ActionListener {
 		
 		btnEliminarAbreviacion = new JButton("");
 		btnEliminarAbreviacion.setToolTipText("Elimina todo el campo");
-		btnEliminarAbreviacion.setIcon(new ImageIcon(PanelCargarAeopuertos.class.getResource("/recursos/eliminar.png")));
+		btnEliminarAbreviacion.setIcon(new ImageIcon(PanelCargarAeropuertos.class.getResource("/recursos/eliminar.png")));
 		btnEliminarAbreviacion.setFocusPainted(false);
 		btnEliminarAbreviacion.setBorderPainted(false);
 		btnEliminarAbreviacion.setContentAreaFilled(false);
@@ -159,7 +170,7 @@ public class PanelCargarAeopuertos extends JPanel implements ActionListener {
 		
 		btnEliminarNombre = new JButton("");
 		btnEliminarNombre.setToolTipText("Elimina todo el campo");
-		btnEliminarNombre.setIcon(new ImageIcon(PanelCargarAeopuertos.class.getResource("/recursos/eliminar.png")));
+		btnEliminarNombre.setIcon(new ImageIcon(PanelCargarAeropuertos.class.getResource("/recursos/eliminar.png")));
 		btnEliminarNombre.setFocusPainted(false);
 		btnEliminarNombre.setContentAreaFilled(false);
 		btnEliminarNombre.setBorderPainted(false);
@@ -168,19 +179,18 @@ public class PanelCargarAeopuertos extends JPanel implements ActionListener {
 		panel.add(btnEliminarNombre);
 		
 		lblNewLabel_2 = new JLabel("");
-		lblNewLabel_2.setIcon(new ImageIcon(PanelCargarAeopuertos.class.getResource("/recursos/aeropuerto1.png")));
+		lblNewLabel_2.setIcon(new ImageIcon(PanelCargarAeropuertos.class.getResource("/recursos/aeropuerto1.png")));
 		lblNewLabel_2.setBounds(191, 26, 231, 129);
 		panel.add(lblNewLabel_2);
 		
 		btnBuscar = new JButton("");
-		btnBuscar.setIcon(new ImageIcon(PanelCargarAeopuertos.class.getResource("/recursos/buscar.png")));
+		btnBuscar.setIcon(new ImageIcon(PanelCargarAeropuertos.class.getResource("/recursos/buscar.png")));
 		btnBuscar.setBounds(1100, 41, 45, 29);
 		btnBuscar.setFocusPainted(false);
 		btnBuscar.setContentAreaFilled(false);
 		btnBuscar.addActionListener(this);
 		//btnBuscar.setBorderPainted(false);
 		panel.add(btnBuscar);
-
 	}
 
 	// Metodo para completar la tabla de los aeropuertos
@@ -214,7 +224,7 @@ public class PanelCargarAeopuertos extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btnAgregar) {
-			AeropuertoVo aeropuertoVo = new AeropuertoVo();
+			
 			aeropuertoVo.setAbreviacion(textAbreviacion.getText());
 			aeropuertoVo.setNombre(textNombre.getText());
 			boolean verificacion = coordinador.getLogicaAeropuerto().validarRegistroAeropuerto(aeropuertoVo);
@@ -266,7 +276,6 @@ public class PanelCargarAeopuertos extends JPanel implements ActionListener {
 			if (fila>=0) {
 				String abreviacion = (String) tableAeropuertos.getValueAt(tableAeropuertos.getSelectedRow(), 0);
 				String nombre = (String) tableAeropuertos.getValueAt(tableAeropuertos.getSelectedRow(), 1);
-				AeropuertoVo aeropuertoVo = new AeropuertoVo();
 				aeropuertoVo.setAbreviacion(textAbreviacion.getText());
 				aeropuertoVo.setNombre(textNombre.getText());
 				boolean verificacion = coordinador.getLogicaAeropuerto().validarModificacion(aeropuertoVo, abreviacion, nombre);
@@ -275,8 +284,6 @@ public class PanelCargarAeopuertos extends JPanel implements ActionListener {
 					completarTablaAeropuerto();
 				}
 				limpiar();
-				
-				//System.out.println(textAbreviacion.getText()+" "+textNombre.getText());
 				
 			} else {
 				JOptionPane.showMessageDialog(null, "Por favor seleccione una fila");

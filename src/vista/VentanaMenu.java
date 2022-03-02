@@ -22,16 +22,22 @@ public class VentanaMenu extends JFrame{
 	private JPanel panelMenu;
 	
 	//Ver esto
-	private PanelCargarAeopuertos cargarAeropuertos;
+	private PanelCargarAeropuertos cargarAeropuertos;
 	private PanelCargarVuelos cargarVuelos;
 
 	
 	/**
 	 * Establece la informacion que se presentara como introduccion del sistema
 	 */
-	public String textoIntroduccion = "";	
+	public String textoIntroduccion = "";
+	
 	
 	public VentanaMenu() {
+		
+		
+	}
+	
+	public void iniciarComponentes() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setBounds(100, 100, 1270, 717);
@@ -47,13 +53,14 @@ public class VentanaMenu extends JFrame{
 		panelMenu.add(coordinador.getPanelMenu());
 		panelMenu.revalidate();
 		panelMenu.repaint();
-		
 	}
 
 	public void setCoordinador(Coordinador coordinador) {
 		this.coordinador = coordinador;
-		
 	}
+	
+
+
 
 	public JPanel getPanelMenu() {
 		return panelMenu;

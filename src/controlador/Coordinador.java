@@ -2,7 +2,7 @@ package controlador;
 
 import modelo.LogicaAeropuerto;
 import modelo.LogicaVuelo;
-import vista.PanelCargarAeopuertos;
+import vista.PanelCargarAeropuertos;
 import vista.PanelCargarVuelos;
 import vista.PanelMenu;
 import vista.VentanaMenu;
@@ -12,7 +12,7 @@ public class Coordinador {
 	private LogicaAeropuerto logicaAeropuerto;
 	private LogicaVuelo logicaVuelo;
 	private VentanaMenu ventanaMenu;
-	private PanelCargarAeopuertos cargarAeropuertos;
+	private PanelCargarAeropuertos cargarAeropuertos;
 	private PanelCargarVuelos cargarVuelos;
 	private PanelMenu panelMenu;
 	
@@ -36,10 +36,10 @@ public class Coordinador {
 		this.ventanaMenu = ventanaMenu;
 	}
 	
-	public PanelCargarAeopuertos getCargarAeropuertos() {
+	public PanelCargarAeropuertos getCargarAeropuertos() {
 		return cargarAeropuertos;
 	}
-	public void setCargarAeropuertos(PanelCargarAeopuertos cargarAeropuertos) {
+	public void setCargarAeropuertos(PanelCargarAeropuertos cargarAeropuertos) {
 		this.cargarAeropuertos = cargarAeropuertos;
 	}
 	public PanelCargarVuelos getCargarVuelos() {

@@ -13,7 +13,6 @@ import modelo.vo.VueloVo;
 public class LogicaVuelo {
 	Coordinador coordinador;
 	VueloDao vueloDao;
-	Pattern pattern; // Patron para expresion regular
 	Date date;
 	
 	public LogicaVuelo() {
@@ -26,6 +25,7 @@ public class LogicaVuelo {
 		this.coordinador = coordinador;		
 	}
 	
+	//Metodo donde valido antes de registrar el vuelo
 	public boolean validarRegistroVuelo(VueloVo vuelo) {
 		//Fecha actual
 		boolean verificacion = true;
@@ -55,11 +55,13 @@ public class LogicaVuelo {
 		return vueloDao.obtenerVuelosAll();
 	}
 
+	//metodo donde valida la eliminacion del vuelo
 	public void validarEliminacionTablaVuelo(String numero_vuelo) {
 		vueloDao.eliminarVuelo(numero_vuelo);
 		
 	}
-
+	
+	//Metodo donde valida antes de modificar un vuelo
 	public boolean validarModificacion(VueloVo vuelo,String numero_viejo) {
 		boolean verificacion = true;
 		if(vuelo.getAeropuerto_origen().equals("") || vuelo.getAeropuerto_destino().equals("") || vuelo.getFecha().equals(null) || vuelo.getTiempo_vuelo().equals("") || vuelo.getDemora().equals("") || vuelo.getNumero_vuelo().equals("")) {
