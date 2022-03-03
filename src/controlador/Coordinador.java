@@ -1,6 +1,7 @@
 package controlador;
 
 import modelo.LogicaAeropuerto;
+import modelo.LogicaTipoBusqueda;
 import modelo.LogicaVuelo;
 import vista.PanelCargarAeropuertos;
 import vista.PanelCargarVuelos;
@@ -11,6 +12,7 @@ public class Coordinador {
 	
 	private LogicaAeropuerto logicaAeropuerto;
 	private LogicaVuelo logicaVuelo;
+	private LogicaTipoBusqueda logicaTipoBusqueda;
 	private VentanaMenu ventanaMenu;
 	private PanelCargarAeropuertos cargarAeropuertos;
 	private PanelCargarVuelos cargarVuelos;
@@ -55,12 +57,19 @@ public class Coordinador {
 	public void setPanelMenu(PanelMenu panelMenu) {
 		this.panelMenu = panelMenu;
 	}
+	public LogicaTipoBusqueda getLogicaTipoBusqueda() {
+		return logicaTipoBusqueda;
+	}
+	public void setLogicaTipoBusqueda(LogicaTipoBusqueda logicaTipoBusqueda) {
+		this.logicaTipoBusqueda = logicaTipoBusqueda;
+	}
+	
+	
 	
 	
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	
+		
 	
 	public void mostrarVentanaMenu() {
 		ventanaMenu.setVisible(true);

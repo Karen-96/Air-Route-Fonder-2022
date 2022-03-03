@@ -3,17 +3,25 @@ package vista;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 
 import controlador.Coordinador;
+import modelo.vo.AeropuertoVo;
+import modelo.vo.VueloVo;
+
 import java.awt.Color;
 import javax.swing.JComboBox;
 import com.toedter.calendar.JDateChooser;
@@ -25,6 +33,7 @@ public class PanelMenu extends JPanel implements ActionListener {
 	private JSeparator separator;
 	private JTabbedPane pestañas;
 	private JButton btnCargarDatos;
+	private VueloVo vueloVo;
 	
 	//Ver esto
 		private PanelCargarAeropuertos cargarAeropuertos;
@@ -36,15 +45,22 @@ public class PanelMenu extends JPanel implements ActionListener {
 		private JLabel lblFechaVuelo;
 		private JDateChooser dateChooserFechaHora;
 		private JButton btnBuscarVuelo;
+		private JComboBox comboBoxTipoBusqueda;
+		private JLabel lblTipoBusqueda;
+		private List<AeropuertoVo> listaAeropuertos;
 
 	/**
 	 * Create the panel.
 	 */
 	public PanelMenu() {
-		
-		//setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setBounds(0, 0, 1270, 717);
-		
+		listaAeropuertos = new ArrayList<>();
+		vueloVo = new VueloVo();
+		iniciarComponentes();
+
+	}
+	
+	public void iniciarComponentes() {
+		setBounds(0, 0, 1270, 717);		
 		setBorder(new EmptyBorder(5, 5, 5, 5));
 		setLayout(null);
 		
@@ -54,11 +70,13 @@ public class PanelMenu extends JPanel implements ActionListener {
 		btnCargarDatos.setBounds(1087, 641, 139, 23);
 		btnCargarDatos.addActionListener(this);
 		
-		JComboBox comboBox = new JComboBox();
-		comboBox.setBounds(483, 339, 304, 22);
-		add(comboBox);
+		comboBoxTipoBusqueda = new JComboBox();
+		comboBoxTipoBusqueda.setModel(new DefaultComboBoxModel(new String[] { "Economico", "Menos horas", "Menos escalas" }));
+		comboBoxTipoBusqueda.setSelectedItem(null);
+		comboBoxTipoBusqueda.setBounds(483, 339, 304, 22);
+		add(comboBoxTipoBusqueda);
 		
-		JLabel lblTipoBusqueda = new JLabel("Tipo B\u00FAsqueda");
+		lblTipoBusqueda = new JLabel("Tipo B\u00FAsqueda");
 		lblTipoBusqueda.setForeground(Color.WHITE);
 		lblTipoBusqueda.setFont(new Font("Tahoma", Font.BOLD, 15));
 		lblTipoBusqueda.setBounds(576, 315, 117, 23);
@@ -67,11 +85,13 @@ public class PanelMenu extends JPanel implements ActionListener {
 		btnBuscarVuelo = new JButton("Buscar Vuelo");
 		btnBuscarVuelo.setFont(new Font("Tahoma", Font.BOLD, 15));
 		btnBuscarVuelo.setBounds(520, 430, 230, 37);
+		btnBuscarVuelo.addActionListener(this);
 		add(btnBuscarVuelo);
 		
 		
 		dateChooserFechaHora = new JDateChooser();
 		dateChooserFechaHora.setBounds(941, 271, 181, 23);
+		dateChooserFechaHora.getJCalendar().setMinSelectableDate(new Date());
 		add(dateChooserFechaHora);
 		
 		lblFechaVuelo = new JLabel("Fecha Partida");
@@ -81,6 +101,7 @@ public class PanelMenu extends JPanel implements ActionListener {
 		add(lblFechaVuelo);
 		
 		comboBoxAeropuertoDestino = new JComboBox();
+		comboBoxAeropuertoDestino.addItem("Seleccione");
 		comboBoxAeropuertoDestino.setBounds(556, 270, 329, 24);
 		add(comboBoxAeropuertoDestino);
 		
@@ -91,6 +112,7 @@ public class PanelMenu extends JPanel implements ActionListener {
 		add(lblAeropuertoDestino);
 		
 		comboBoxAeropuertoOrigen = new JComboBox();
+		comboBoxAeropuertoOrigen.addItem("Seleccione");
 		comboBoxAeropuertoOrigen.setBounds(177, 270, 329, 24);
 		add(comboBoxAeropuertoOrigen);
 		
@@ -117,26 +139,31 @@ public class PanelMenu extends JPanel implements ActionListener {
 		fondoVentanaMenu.setIcon(new ImageIcon(VentanaMenu.class.getResource("/recursos/ImagenFondo1.jpg")));
 		fondoVentanaMenu.setBounds(0, 0, 1264, 688);
 		add(fondoVentanaMenu);
-
 	}
+	
 	public void setCoordinador(Coordinador coordinador) {
 		this.coordinador = coordinador;
 		
+	}
+	public void mostrarAeropuertosComboBox() {
+		listaAeropuertos = coordinador.getLogicaAeropuerto().validarConsultaAeropuerto();
+		for (int i = 0; i<listaAeropuertos.size(); i++) {
+			comboBoxAeropuertoOrigen.addItem(listaAeropuertos.get(i).getAbreviacion()+" - "+listaAeropuertos.get(i).getNombre());
+			comboBoxAeropuertoDestino.addItem(listaAeropuertos.get(i).getAbreviacion()+" - "+listaAeropuertos.get(i).getNombre());			
+		}	
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource()==btnCargarDatos) {
 			pestañas = new JTabbedPane();
-			pestañas.setBounds(0,0,1255,678);
-//			cargarAeropuertos = new PanelCargarAeopuertos();
+			pestañas.setBounds(0, 0, 1270, 717);
 			cargarVuelos = coordinador.getCargarVuelos();
 			cargarVuelos.mostrarAeropuertosComboBox();;
 			cargarVuelos.completarTablaVuelos();
 			
 			cargarAeropuertos = coordinador.getCargarAeropuertos();
-			cargarAeropuertos.completarTablaAeropuerto();
-			
+			cargarAeropuertos.completarTablaAeropuerto();		
 			
 			pestañas.add("Aeropuertos",cargarAeropuertos);
 			pestañas.setFont(new Font("Arial", Font.PLAIN, 20));
@@ -145,6 +172,40 @@ public class PanelMenu extends JPanel implements ActionListener {
 			coordinador.getVentanaMenu().getPanelMenu().add(pestañas);
 			coordinador.getVentanaMenu().getPanelMenu().revalidate();
 			coordinador.getVentanaMenu().getPanelMenu().repaint();
+			
+			
+		}
+		if (e.getSource() == btnBuscarVuelo) {
+			//Obtengo el nuevo aeropuerto origen seleccionado del comboBox
+			String origen = (String) comboBoxAeropuertoOrigen.getSelectedItem();
+			String[] parts = origen.split("-");
+			String origen_abreviacion_seleccionado = parts[0]; // abreviacion Origen
+			
+			//Obtengo el nuevo aeropuerto destino seleccionado del comboBox
+			String destino = (String) comboBoxAeropuertoDestino.getSelectedItem();
+			String[] parts2 = destino.split("-");
+			String destino_abreviacion_seleccionado = parts2[0]; // abreviacion Destino	
+			
+			if(dateChooserFechaHora.getDate() == null) {
+				JOptionPane.showMessageDialog(null, "Por favor seleccione una fecha");
+			}
+				
+			//-------------------Transformo la fecha Date a un Timestamp--------------------------------------
+			Date date = dateChooserFechaHora.getDate();
+			long d = date.getTime();
+			java.sql.Timestamp fecha = new java.sql.Timestamp(d);
+			//------------------------------------------------------------------------------------------------
+			
+           
+			
+			vueloVo.setAeropuerto_origen(origen_abreviacion_seleccionado);
+			vueloVo.setAeropuerto_destino(destino_abreviacion_seleccionado);
+			vueloVo.setFecha(fecha);
+			int itemTipoBusqueda= comboBoxTipoBusqueda.getSelectedIndex();
+			coordinador.getLogicaTipoBusqueda().validarTipoDeBusqueda(vueloVo, itemTipoBusqueda);
+			
+			
+			
 			
 		}
 		

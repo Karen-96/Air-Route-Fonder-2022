@@ -1,21 +1,19 @@
 package vista;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Random;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 
 import controlador.Coordinador;
-import javax.swing.JLabel;
-import javax.swing.ImageIcon;
-import java.awt.Font;
-import javax.swing.JSeparator;
-import javax.swing.JTabbedPane;
-import javax.swing.JButton;
 
 public class VentanaMenu extends JFrame{
 	private Coordinador coordinador; //objeto miCoordinador que permite la relacion entre esta clase y la clase coordinador
@@ -24,7 +22,10 @@ public class VentanaMenu extends JFrame{
 	//Ver esto
 	private PanelCargarAeropuertos cargarAeropuertos;
 	private PanelCargarVuelos cargarVuelos;
+	private PanelMenu panelMenuBusqueda;
 
+	
+	
 	
 	/**
 	 * Establece la informacion que se presentara como introduccion del sistema
@@ -33,7 +34,6 @@ public class VentanaMenu extends JFrame{
 	
 	
 	public VentanaMenu() {
-		
 		
 	}
 	
@@ -49,10 +49,12 @@ public class VentanaMenu extends JFrame{
 		setResizable(false); //No se puede maximinizar
 		setContentPane(panelMenu);
 		
+		coordinador.getPanelMenu().mostrarAeropuertosComboBox();
 		panelMenu.removeAll();
 		panelMenu.add(coordinador.getPanelMenu());
 		panelMenu.revalidate();
 		panelMenu.repaint();
+		
 	}
 
 	public void setCoordinador(Coordinador coordinador) {
@@ -69,5 +71,7 @@ public class VentanaMenu extends JFrame{
 	public void setPanelMenu(JPanel panelMenu) {
 		this.panelMenu = panelMenu;
 	}
+	
+	
 	
 }
