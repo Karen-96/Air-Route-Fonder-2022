@@ -425,7 +425,9 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 			//Recorto solo la abreviacion del aeropuerto Destino
 			String destino = (String) comboBoxAeropuertosDestino.getSelectedItem();
 			String[] parts2 = destino.split("-");
-			String destino_abreviacion = parts2[0]; // abreviacion Destino			
+			String destino_abreviacion = parts2[0]; // abreviacion Destino	
+			
+			
 			
 			//-------------------Transforma la fecha a un string----------------------------------------------
 //			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");

@@ -133,4 +133,35 @@ public class VueloDao {
 		}
 
 	}
+
+	//Metodo donde busca aeropuertos dependiendo de la fecha que eligio el usuario
+	public List<VueloVo> obtenerVuelosAllFecha(String fecha) {
+		ArrayList<VueloVo> listaVuelos = new ArrayList<>();
+		VueloVo vuelo = null;
+		Conexion conex = new Conexion();
+
+		try {
+			
+			PreparedStatement consulta = conex.getConnection().prepareStatement("SELECT * FROM vuelo where fecha LIKE '"+fecha+"%'");
+			
+			System.out.println(fecha);
+			ResultSet rs = consulta.executeQuery();
+			while (rs.next()) {
+				vuelo = new VueloVo();
+				vuelo.setNumero_vuelo(rs.getString("numero_vuelo"));
+				vuelo.setFecha(Timestamp.valueOf(rs.getString("fecha")));
+				vuelo.setAeropuerto_origen(rs.getString("aeropuerto_origen"));
+				vuelo.setAeropuerto_destino(rs.getString("aeropuerto_destino"));
+				vuelo.setPrecio(Integer.parseInt(rs.getString("precio")));
+				vuelo.setTiempo_vuelo(rs.getString("tiempo_vuelo"));
+				vuelo.setDemora(rs.getString("demora"));
+				listaVuelos.add(vuelo);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			JOptionPane.showMessageDialog(null, "Error, no se conecto");
+			System.out.println(e);
+		}
+		return listaVuelos;
+	}
 }

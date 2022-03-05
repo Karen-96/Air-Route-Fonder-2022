@@ -1,6 +1,7 @@
 package controlador;
 
 import modelo.LogicaAeropuerto;
+import modelo.LogicaHilo;
 import modelo.LogicaTipoBusqueda;
 import modelo.LogicaVuelo;
 import vista.PanelCargarAeropuertos;
@@ -13,6 +14,7 @@ public class Aplicacion {
 	private LogicaAeropuerto logicaAeropuerto;
 	private LogicaVuelo logicaVuelo;
 	private LogicaTipoBusqueda logicaTipoBusqueda;
+	private LogicaHilo logicaHilo;
 	private VentanaMenu ventanaMenu;
 	private PanelMenu panelMenu;
 	private PanelCargarAeropuertos cargarAeropuertos;

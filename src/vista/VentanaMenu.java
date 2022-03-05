@@ -49,6 +49,7 @@ public class VentanaMenu extends JFrame{
 		setResizable(false); //No se puede maximinizar
 		setContentPane(panelMenu);
 		
+		
 		coordinador.getPanelMenu().mostrarAeropuertosComboBox();
 		panelMenu.removeAll();
 		panelMenu.add(coordinador.getPanelMenu());

@@ -77,6 +77,14 @@ public class VueloVo {
 	public void setDemora(String demora) {
 		this.demora = demora;
 	}
+
+	@Override
+	public String toString() {
+		return "VueloVo {\nidvuelo=" + idvuelo + ",\n numero_vuelo=" + numero_vuelo + ",\n fecha=" + fecha
+				+ ",\n precio=" + precio + ",\n aeropuerto_origen=" + aeropuerto_origen + ",\n aeropuerto_destino="
+				+ aeropuerto_destino + ",\n tiempo_vuelo=" + tiempo_vuelo + ",\n demora=" + demora + "\n}";
+	}
+	
 	
 
 }
