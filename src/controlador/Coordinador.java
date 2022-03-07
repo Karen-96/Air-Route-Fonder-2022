@@ -7,6 +7,7 @@ import modelo.LogicaVuelo;
 import vista.PanelCargarAeropuertos;
 import vista.PanelCargarVuelos;
 import vista.PanelMenu;
+import vista.PanelSeleccionTipoBusqueda;
 import vista.VentanaMenu;
 
 public class Coordinador {
@@ -19,6 +20,7 @@ public class Coordinador {
 	private PanelCargarAeropuertos cargarAeropuertos;
 	private PanelCargarVuelos cargarVuelos;
 	private PanelMenu panelMenu;
+	private PanelSeleccionTipoBusqueda infoBusqueda;
 	
 	
 	public LogicaAeropuerto getLogicaAeropuerto() {
@@ -72,9 +74,13 @@ public class Coordinador {
 		this.logicaHilo = logicaHilo;
 	}
 	
-	
-	
-	
+
+	public PanelSeleccionTipoBusqueda getInfoBusqueda() {
+		return infoBusqueda;
+	}
+	public void setInfoBusqueda(PanelSeleccionTipoBusqueda infoBusqueda) {
+		this.infoBusqueda = infoBusqueda;
+	}
 	
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -84,25 +90,5 @@ public class Coordinador {
 	public void mostrarVentanaMenu() {
 		ventanaMenu.setVisible(true);
 	}
-	/*
-	public boolean registrarAeropuerto(AeropuertoVo aeropuertoVo) {
-		return logica.validarRegistroAeropuerto(aeropuertoVo);
-		
-	}
 	
-	public List<AeropuertoVo> obtenerAeropuertosAll() {				
-		return logica.validarConsultaAeropuerto();
-	}
-
-	public boolean actualizarAeropuerto(AeropuertoVo aeropuertoVo, String abreviacion, String nombre) {
-		return logica.validarModificacion(aeropuertoVo, abreviacion, nombre);
-	}
-	
-	public boolean registrarVuelo(VueloVo vuelovo) {
-		return logica.validarRegistroVuelo(vuelovo);
-	}
-	public List<VueloVo> obtenerVuelosAll() {
-		return logica.validarConsultaVuelos();
-	}
-	*/
 }

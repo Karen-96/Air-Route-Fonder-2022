@@ -237,12 +237,12 @@ public class PanelMenu extends JPanel implements ActionListener {
 			grafo = coordinador.getLogicaTipoBusqueda().crearGrafo(listaVuelos);
 			
 			// Se busca el camino mas corto usando el algoritmo de disktra
-			PositionalList<Vertex<String>> caminito = coordinador.getLogicaTipoBusqueda().caminoMasCorto(grafo, origen_abreviacion_seleccionado, destino_abreviacion_seleccionado,
+			List<PositionalList<Vertex<String>>> caminito = coordinador.getLogicaTipoBusqueda().caminoMasCorto(grafo, origen_abreviacion_seleccionado, destino_abreviacion_seleccionado,
 					comboBoxTipoBusqueda.getSelectedIndex());
 			
 			// Se obtiene la informacion a mostrar en pantalla
 			 //porq de objeto?
-			String caminoMasCorto = coordinador.getLogicaTipoBusqueda().obtenerBusqueda(grafo, caminito);
+			String caminoMasCorto = coordinador.getLogicaTipoBusqueda().obtenerBusqueda(grafo, caminito,comboBoxTipoBusqueda.getSelectedIndex());
 			
 			System.out.println("-----------------------------------------------");
 			System.out.println("----------------------------------------------");
@@ -255,6 +255,11 @@ public class PanelMenu extends JPanel implements ActionListener {
 			/*for (Vertex<String> vertex : caminito) {
 				System.out.println(vertex.getElement());
 			}*/
+			coordinador.getVentanaMenu().getPanelMenu().removeAll();
+			coordinador.getVentanaMenu().getPanelMenu().add(coordinador.getInfoBusqueda());
+			coordinador.getVentanaMenu().getPanelMenu().revalidate();
+			coordinador.getVentanaMenu().getPanelMenu().repaint();
+			
 			
 
 		}

@@ -2,6 +2,10 @@ package modelo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 import javax.swing.JOptionPane;
 
@@ -65,23 +69,67 @@ public class LogicaTipoBusqueda {
 	 *         mas corto.
 	 */
 	// Calcula el camino mas corto
-	public PositionalList<Vertex<String>> caminoMasCorto(Graph<String, VueloVo> g, String origen, String destino,
+	public List<PositionalList<Vertex<String>>> caminoMasCorto(Graph<String, VueloVo> g, String origen, String destino,
 			int tipoBusqueda) {
-		// Obtengo los edge y creo el grafo segun el tipo de busqueda
-		switch (tipoBusqueda) {
-		case 0:
-			Graph<String, Integer> grafo = masEconomico(g);
-			return GraphAlgorithms.shortestPathList(grafo, busqueda(grafo, origen), busqueda(grafo, destino));
-		case 1:
-			Graph<String, Integer> grafo2 = menosHoras(g);
-			
-			return GraphAlgorithms.shortestPathList(grafo2, busqueda(grafo2, origen), busqueda(grafo2, destino));
-		case 2:
-			 return menosEscalas(g, origen, destino);
-		default:
-			break;
+
+		
+		ExecutorService es = Executors.newCachedThreadPool();
+		List<FutureTask> hilos = new ArrayList<FutureTask>();
+
+		//Copio y creo los grafos para aplicar el algoritmo de disktra
+		Graph<String, Integer> grafo = masEconomico(g);
+		Graph<String, Integer> grafo2 = menosHoras(g);
+
+		//Creo los hilos
+		hilos.add(new FutureTask(new LogicaHilo(grafo, origen, destino, "Mas Economico")));// mas economico
+		hilos.add(new FutureTask(new LogicaHilo(grafo2, origen, destino, "Menos Horas")));// menos horas
+
+		//Los ejecuto
+		for (FutureTask futureTask : hilos) {
+			es.submit(futureTask);
 		}
-		return null;
+
+		/**
+		 * [0] mas economico
+		 * [1] menos horas
+		 * [2] menos escalas
+		 */
+		List<PositionalList<Vertex<String>>> listCaminos = new ArrayList<>();
+		boolean finProcesos;
+
+		
+		//Me aseguro que todos los hilos finalicen y devuelvan un valor.
+		while (true) {
+
+			finProcesos = true;
+			
+			for (FutureTask hilo : hilos) {
+				if(!hilo.isDone()) {
+					   finProcesos = false;	
+				}
+			}
+			
+			if (finProcesos) {
+				for (FutureTask hilo : hilos) {
+					try {
+						listCaminos.add((PositionalList<Vertex<String>>) hilo.get());
+						
+					} catch (InterruptedException | ExecutionException e) {
+						e.printStackTrace();
+					}					
+				}
+				break;
+			}
+		}
+		
+		//Finalizo el ExecutorService
+		es.shutdown ();
+		
+		//Se añade el menos escala
+		listCaminos.add(menosEscalas(listCaminos.get(0), listCaminos.get(1)));
+		
+		return listCaminos;
+
 	}
 
 	/**
@@ -101,16 +149,18 @@ public class LogicaTipoBusqueda {
 			mapaVertice.put(guardaVertice, grafo.insertVertex(guardaVertice.getElement()));
 		}
 		Vertex<String>[] vertice;
-		
+
 		for (Edge<VueloVo> arco : grafos.edges()) {
-			//Tranformo la hora en un entero			
+			// Tranformo la hora en un entero
 			String hora = arco.getElement().getTiempo_vuelo();
 			String[] parts1 = hora.split(":");
-			Integer tiempo_vuelo =Integer.parseInt(parts1[0]+parts1[1]);
-			System.out.println(tiempo_vuelo);		
-			
+			Integer tiempo_vuelo = Integer.parseInt(parts1[0] + parts1[1]);
+			System.out.println(tiempo_vuelo);
+
 			vertice = grafos.endVertices(arco);
-			grafo.insertEdge(mapaVertice.get(vertice[0]), mapaVertice.get(vertice[1]), (tiempo_vuelo));// origen, destino y horario
+			grafo.insertEdge(mapaVertice.get(vertice[0]), mapaVertice.get(vertice[1]), (tiempo_vuelo));// origen,
+																										// destino y
+																										// horario
 		}
 		return grafo;
 	}
@@ -147,43 +197,23 @@ public class LogicaTipoBusqueda {
 
 		return grafo;
 	}
-	
-	/**
-	 * Este método calcula los 3 metodos (Economico, menos horas) y elige 
-	 * el que posee menos escalas. 
-	 * @param g 	recibe el grafo principal
-	 * @param orig		recibe el aeropuerto origen que el usuario eligio.
-	 * @param dest		recibe el aeropuerto destino que el usuario eligio.
-	 * @return PositionalList<Vertex<String>>		contiene los nodos que hacen el
-	 * camino mas corto.
-	 */
-	private PositionalList<Vertex<String>> menosEscalas(Graph<String, VueloVo> g, String orig, String dest) {
-		Graph<String, Integer> g1 = masEconomico(g);
-		Graph<String, Integer> g2 = menosHoras(g);
-		PositionalList<Vertex<String>> masEconomico = GraphAlgorithms.shortestPathList(g1, busqueda(g1, orig),
-				busqueda(g1, dest));
-		PositionalList<Vertex<String>> menosHorasVuelo = GraphAlgorithms.shortestPathList(g2, busqueda(g2, orig),
-				busqueda(g2, dest));
-		if (masEconomico.size() > menosHorasVuelo.size()) {
-			return menosHorasVuelo;
-		}
-		return masEconomico;
-	}
 
 	/**
-	 * Este método busca el vertice en el grafo y lo devuelve.
+	 * Este método calcula los 3 metodos (Economico, menos horas) y elige el que
+	 * posee menos escalas.
 	 * 
-	 * @param g          recibe un grafo
-	 * @param aeropuerto recibe la abreviación del aeropuerto a buscar en el grafo.
-	 * @return Vertex<V> retorna el nodo cuya abreviación es la que recibio por
-	 *         parametro.
+	 * @param g    recibe el grafo principal
+	 * @param orig recibe el aeropuerto origen que el usuario eligio.
+	 * @param dest recibe el aeropuerto destino que el usuario eligio.
+	 * @return PositionalList<Vertex<String>> contiene los nodos que hacen el camino
+	 *         mas corto.
 	 */
-
-	private static <V, E> Vertex<V> busqueda(Graph<V, E> g, String aeropuerto) {
-		for (Vertex<V> aux : g.vertices())
-			if (aux.getElement().equals(aeropuerto))
-				return aux;
-		return null;
+	private PositionalList<Vertex<String>> menosEscalas(PositionalList<Vertex<String>> economico, PositionalList<Vertex<String>> horas) {
+		
+		if (economico.size() > horas.size()) {
+			return horas;
+		}
+		return economico;
 	}
 
 	/**
@@ -192,19 +222,28 @@ public class LogicaTipoBusqueda {
 	 * 
 	 * @param grafo       recibe el grafo principal
 	 * @param caminoCorto recibe el camino mas corto
+	 * @param tipoBusqueda 
 	 * @param nombres     recibe los nombres de los aeropuertos
 	 * @return ArrayList<Object[]>
 	 */
-	public String obtenerBusqueda(Graph<String, VueloVo> grafo, PositionalList<Vertex<String>> caminoCorto) {
+	public String obtenerBusqueda(Graph<String, VueloVo> grafo, List<PositionalList<Vertex<String>>> caminoCorto, int tipoBusqueda) {
 		String mensaje = "";
+		
+		/**
+		 * [0] mas economico
+		 * [1] menos horas
+		 * [2] menos escalas
+		 */
 
+		
+		
 		// Almaceno los vertices del grafo
 		ArrayList<Vertex<String>> vertices = new ArrayList<Vertex<String>>();
 		// Almaceno los arcos
 		ArrayList<VueloVo> vuelo = new ArrayList<>();
 
 		// obtengo los vertices del grafo q estan en la lista
-		for (Position<Vertex<String>> aux : caminoCorto.positions()) {
+		for (Position<Vertex<String>> aux : caminoCorto.get(tipoBusqueda).positions()) {
 			vertices.add(busqueda(grafo, aux.getElement().getElement()));
 		}
 		// obtengo los arcos
@@ -221,6 +260,22 @@ public class LogicaTipoBusqueda {
 
 		}
 		return mensaje;
+	}
+
+	/**
+	 * Este método busca el vertice en el grafo y lo devuelve.
+	 * 
+	 * @param g          recibe un grafo
+	 * @param aeropuerto recibe la abreviación del aeropuerto a buscar en el grafo.
+	 * @return Vertex<V> retorna el nodo cuya abreviación es la que recibio por
+	 *         parametro.
+	 */
+
+	public static <V, E> Vertex<V> busqueda(Graph<V, E> g, String aeropuerto) {
+		for (Vertex<V> aux : g.vertices())
+			if (aux.getElement().equals(aeropuerto))
+				return aux;
+		return null;
 	}
 
 	/**

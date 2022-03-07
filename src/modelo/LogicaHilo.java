@@ -1,24 +1,25 @@
 package modelo;
 
+import java.util.concurrent.Callable;
+
 import controlador.Coordinador;
-import modelo.vo.Buffer;
-import modelo.vo.BufferTipoBusqueda;
 import net.datastructures.Graph;
 import net.datastructures.GraphAlgorithms;
+import net.datastructures.PositionalList;
 import net.datastructures.Vertex;
 
-public class LogicaHilo implements Runnable {
+public class LogicaHilo implements Callable<PositionalList<Vertex<String>>>{
 	Coordinador coordinador;
-	private BufferTipoBusqueda buffer;
 	private String origen;
 	private String destino;
+	private Graph<String, Integer> grafo;
+	private String tipoBusqueda;
 	
-	
-	public <V> LogicaHilo( BufferTipoBusqueda buffer, String origen, String destino) {
-		this.buffer = buffer;
+	public LogicaHilo(Graph<String, Integer> grafo, String origen, String destino, String tipoBusqueda) {
+		this.grafo = grafo;
 		this.origen = origen;
 		this.destino = destino;
-		
+		this.tipoBusqueda = tipoBusqueda;
 	}
 
 	public void setCoordinador(Coordinador coordinador) {
@@ -42,28 +43,14 @@ public class LogicaHilo implements Runnable {
 	}
 
 	@Override
-	public void run() {
-		if(buffer.size() > 0) {
-			try {
-				Graph<String, Integer> grafo = buffer.get();
-				GraphAlgorithms.shortestPathList(grafo, busqueda(grafo, origen), busqueda(grafo, destino));
-				
-				
-				
-				
-				
-				
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-		}
-
-		
-		
-		
+	public PositionalList<Vertex<String>> call() throws Exception {
+		return GraphAlgorithms.shortestPathList(grafo, busqueda(grafo, origen), busqueda(grafo, destino));
 	}
+
+	public String getTipoBusqueda() {
+		return tipoBusqueda;
+	}
+
 	
 
 }

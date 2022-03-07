@@ -7,6 +7,7 @@ import modelo.LogicaVuelo;
 import vista.PanelCargarAeropuertos;
 import vista.PanelCargarVuelos;
 import vista.PanelMenu;
+import vista.PanelSeleccionTipoBusqueda;
 import vista.VentanaMenu;
 
 public class Aplicacion {
@@ -14,11 +15,11 @@ public class Aplicacion {
 	private LogicaAeropuerto logicaAeropuerto;
 	private LogicaVuelo logicaVuelo;
 	private LogicaTipoBusqueda logicaTipoBusqueda;
-	private LogicaHilo logicaHilo;
 	private VentanaMenu ventanaMenu;
 	private PanelMenu panelMenu;
 	private PanelCargarAeropuertos cargarAeropuertos;
 	private PanelCargarVuelos cargarVuelos;	
+	private PanelSeleccionTipoBusqueda infoBusqueda;
 	private Coordinador coordinador;
 	
 	public static void main(String[] args) {
@@ -40,6 +41,7 @@ public class Aplicacion {
 		cargarAeropuertos = new PanelCargarAeropuertos();
 		cargarVuelos = new PanelCargarVuelos();
 		panelMenu = new PanelMenu();
+		infoBusqueda = new PanelSeleccionTipoBusqueda();
 		
 		/*Se establecen las relaciones entre clases*/
 		ventanaMenu.setCoordinador(coordinador);
@@ -49,6 +51,7 @@ public class Aplicacion {
 		logicaAeropuerto.setCoordinador(coordinador);
 		logicaVuelo.setCoordinador(coordinador);
 		logicaTipoBusqueda.setCoordinador(coordinador);
+		infoBusqueda.setCoordinador(coordinador);
 		
 		
 		/*Se establecen relaciones con la clase coordinador*/
@@ -59,6 +62,7 @@ public class Aplicacion {
 		coordinador.setLogicaAeropuerto(logicaAeropuerto);
 		coordinador.setLogicaVuelo(logicaVuelo);
 		coordinador.setLogicaTipoBusqueda(logicaTipoBusqueda);
+		coordinador.setInfoBusqueda(infoBusqueda);
 		
 		// Muestra la aplicaion en pantalla
 		ventanaMenu.iniciarComponentes();
