@@ -28,6 +28,9 @@ public class PanelSeleccionTipoBusqueda extends JPanel {
 		lblFondo.setIcon(new ImageIcon(PanelSeleccionTipoBusqueda.class.getResource("/recursos/fondo2.jpg")));
 		lblFondo.setBounds(0, 0, 1270, 717);
 		add(lblFondo);
+		
+		
+		
 	}
 	
 	public void setCoordinador(Coordinador coordinador) {
