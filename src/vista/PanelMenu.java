@@ -26,6 +26,7 @@ import controlador.Coordinador;
 import modelo.vo.AeropuertoVo;
 import modelo.vo.VueloVo;
 import net.datastructures.Graph;
+import net.datastructures.Position;
 import net.datastructures.PositionalList;
 import net.datastructures.Vertex;
 
@@ -36,12 +37,20 @@ public class PanelMenu extends JPanel implements ActionListener {
 	private JLabel fondoVentanaMenu;
 	private JSeparator separator;
 	private JTabbedPane pestañas;
+	private JTabbedPane pestañasBusqueda;
 	private JButton btnCargarDatos;
 	private VueloVo vueloVo;
 
 	// Ver esto
 	private PanelCargarAeropuertos cargarAeropuertos;
 	private PanelCargarVuelos cargarVuelos;
+
+	// Paneles de la Info de busqueda----------------------
+	private PanelBusquedaEconomico busquedaEconomico;
+	private PanelBusquedaMenosEscala busquedaMenosEscala;
+	private PanelBusquedaMenosHoras busquedaMenosHoras;
+	// ----------------------------------------------------
+
 	private JLabel lblAeropuertoDestino;
 	private JLabel lblAeropuertoOrigen;
 	private JComboBox comboBoxAeropuertoOrigen;
@@ -59,7 +68,7 @@ public class PanelMenu extends JPanel implements ActionListener {
 	// Grafo
 	Graph<String, VueloVo> grafo;
 	private JLabel lblMensaje;
-	
+
 	/**
 	 * Create the panel.
 	 */
@@ -151,11 +160,11 @@ public class PanelMenu extends JPanel implements ActionListener {
 		fondoVentanaMenu.setIcon(new ImageIcon(VentanaMenu.class.getResource("/recursos/ImagenFondo1.jpg")));
 		fondoVentanaMenu.setBounds(0, 0, 1264, 688);
 		add(fondoVentanaMenu);
-		
+
 		lblMensaje = new JLabel("");
 		lblMensaje.setBounds(56, 360, 304, 89);
 		add(lblMensaje);
-		
+
 	}
 
 	public void setCoordinador(Coordinador coordinador) {
@@ -199,18 +208,20 @@ public class PanelMenu extends JPanel implements ActionListener {
 			// Obtengo el nuevo aeropuerto origen seleccionado del comboBox
 			String origen = (String) comboBoxAeropuertoOrigen.getSelectedItem();
 			String[] parts = origen.split("-");
-			origen_abreviacion_seleccionado = parts[0]; // abreviacion Origen
+			origen_abreviacion_seleccionado = parts[0].trim(); // abreviacion Origen
+			
 
 			// Obtengo el nuevo aeropuerto destino seleccionado del comboBox
 			String destino = (String) comboBoxAeropuertoDestino.getSelectedItem();
 			String[] parts2 = destino.split("-");
-			destino_abreviacion_seleccionado = parts2[0]; // abreviacion Destino
+			destino_abreviacion_seleccionado = parts2[0].trim(); // abreviacion Destino
 
 			if (dateChooserFechaHora.getDate() == null) {
 				JOptionPane.showMessageDialog(null, "Por favor seleccione una fecha");
 			}
 
-			// -------------------Transformo la fecha Date a un Timestamp--------------------------------------
+			// -------------------Transformo la fecha Date a un
+			// Timestamp--------------------------------------
 			Date date = dateChooserFechaHora.getDate();
 			long d = date.getTime();
 			java.sql.Timestamp fecha = new java.sql.Timestamp(d);
@@ -218,49 +229,112 @@ public class PanelMenu extends JPanel implements ActionListener {
 
 			vueloVo.setAeropuerto_origen(origen_abreviacion_seleccionado);
 			vueloVo.setAeropuerto_destino(destino_abreviacion_seleccionado);
-			vueloVo.setFecha(fecha);	
-			
+			vueloVo.setFecha(fecha);
+
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-			Date fechaSeleccionada =dateChooserFechaHora.getDate();
-			System.out.println(dateFormat.format(fechaSeleccionada)); //2013/10/15 16:16:39
-			
-			//Trae el numero que seleccino el usuario para el tipo de busqueda
+			Date fechaSeleccionada = dateChooserFechaHora.getDate();
+			System.out.println(dateFormat.format(fechaSeleccionada)); // 2013/10/15 16:16:39
+
+			// Trae el numero que seleccino el usuario para el tipo de busqueda
 			int itemTipoBusqueda = comboBoxTipoBusqueda.getSelectedIndex();
+
+			// Valida que los campos esten correctamente los datos para buscar el vuelo
+			boolean verificacion = coordinador.getLogicaTipoBusqueda().validarTipoDeBusqueda(vueloVo, itemTipoBusqueda);
+			System.out.println(verificacion);
+			if (verificacion) {
+				// Busca los vuelos dependiendo la fecha que seleccione el usuario
+				List<VueloVo> listaVuelos = coordinador.getLogicaVuelo()
+						.validarConsultaVuelosFecha(dateFormat.format(fechaSeleccionada));
+				
+				if(listaVuelos.isEmpty()) {
+					JOptionPane.showMessageDialog(null,"No hay Vuelos para esa fecha, seleccione otra fecha","Advertencia",JOptionPane.WARNING_MESSAGE);
+									
+				}else {
+					// Crea el grafo con los vuelos que se busque dependiendo de la fecha que
+					// ingrese el usuario
+					grafo = coordinador.getLogicaTipoBusqueda().crearGrafo(listaVuelos);
+
+					for (Vertex<String> vueloVo : grafo.vertices()) {
+						System.out.println(vueloVo.getElement());
+					}
+					System.out.println("Origen:    "+ origen_abreviacion_seleccionado);
+				    System.out.println("Destino:   "+ destino_abreviacion_seleccionado);
+					
+					
+					// Se busca el camino mas corto usando el algoritmo de disktra
+					List<PositionalList<Vertex<String>>> caminito = coordinador.getLogicaTipoBusqueda().caminoMasCorto(
+							grafo, origen_abreviacion_seleccionado, destino_abreviacion_seleccionado,
+							comboBoxTipoBusqueda.getSelectedIndex());
+					
+					boolean verf = true;
+					// verifico que las listas no esten vacias
+					for (PositionalList<Vertex<String>> list : caminito) {
+						if (list == null) {
+							verf = false;
+						}
+					}
+
+					if (verf) {
+						// Se obtiene la informacion a mostrar en pantalla
+						// porq de objeto?
+						ArrayList<Object[]> caminoMasCortoEconomico = coordinador.getLogicaTipoBusqueda().obtenerBusqueda(grafo,
+								caminito, 0);
+						ArrayList<Object[]> caminoMasCortoMenosHoras = coordinador.getLogicaTipoBusqueda()
+								.obtenerBusqueda(grafo, caminito, 1);
+						ArrayList<Object[]> caminoMasCortoMenosEscalas = coordinador.getLogicaTipoBusqueda()
+								.obtenerBusqueda(grafo, caminito, 2);
+
+						pestañasBusqueda = new JTabbedPane();
+						pestañasBusqueda.setBounds(0, 0, 1270, 717);
+						busquedaEconomico = new PanelBusquedaEconomico(caminoMasCortoEconomico);
+						busquedaMenosHoras = new PanelBusquedaMenosHoras(caminoMasCortoMenosHoras);
+						busquedaMenosEscala = new PanelBusquedaMenosEscala(caminoMasCortoMenosEscalas);
+
+						// Muestro las pestañas dependiendo la seleccion del Usuario pero con los 3
+						// metodos de busquedas ya realizados por hilos
+						if (comboBoxTipoBusqueda.getSelectedIndex() == 0) {
+							pestañasBusqueda.add("Económico", busquedaEconomico);
+							pestañasBusqueda.setFont(new Font("Arial", Font.PLAIN, 20));
+							pestañasBusqueda.add("Menos Horas", busquedaMenosHoras);
+							pestañasBusqueda.add("Menos Escalas", busquedaMenosEscala);
+							coordinador.getVentanaMenu().getPanelMenu().removeAll();
+							coordinador.getVentanaMenu().getPanelMenu().add(pestañasBusqueda);
+							coordinador.getVentanaMenu().getPanelMenu().revalidate();
+							coordinador.getVentanaMenu().getPanelMenu().repaint();
+						} else if (comboBoxTipoBusqueda.getSelectedIndex() == 1) {
+							pestañasBusqueda.add("Menos Horas", busquedaMenosHoras);
+							pestañasBusqueda.add("Menos Escalas", busquedaMenosEscala);
+							pestañasBusqueda.add("Económico", busquedaEconomico);
+							pestañasBusqueda.setFont(new Font("Arial", Font.PLAIN, 20));
+							coordinador.getVentanaMenu().getPanelMenu().removeAll();
+							coordinador.getVentanaMenu().getPanelMenu().add(pestañasBusqueda);
+							coordinador.getVentanaMenu().getPanelMenu().revalidate();
+							coordinador.getVentanaMenu().getPanelMenu().repaint();
+
+						} else {
+							pestañasBusqueda.add("Menos Escalas", busquedaMenosEscala);
+							pestañasBusqueda.add("Económico", busquedaEconomico);
+							pestañasBusqueda.add("Menos Horas", busquedaMenosHoras);
+							pestañasBusqueda.setFont(new Font("Arial", Font.PLAIN, 20));
+							coordinador.getVentanaMenu().getPanelMenu().removeAll();
+							coordinador.getVentanaMenu().getPanelMenu().add(pestañasBusqueda);
+							coordinador.getVentanaMenu().getPanelMenu().revalidate();
+							coordinador.getVentanaMenu().getPanelMenu().repaint();
+
+						}
+						
+					}else {
+						JOptionPane.showMessageDialog(null, "Error","Grafo Nulo", JOptionPane.ERROR_MESSAGE);
+
+					}
+										
+					
+					
+				}
+
 			
-			//Valida que los campos esten correctamente los datos para buscar el vuelo
-			coordinador.getLogicaTipoBusqueda().validarTipoDeBusqueda(vueloVo, itemTipoBusqueda);
-			
-			//Busca los vuelos dependiendo la fecha que seleccione el usuario
-			List<VueloVo> listaVuelos = coordinador.getLogicaVuelo().validarConsultaVuelosFecha(dateFormat.format(fechaSeleccionada));	
-			
-			//Crea el grafo con los vuelos que se busque dependiendo de la fecha que ingrese el usuario
-			grafo = coordinador.getLogicaTipoBusqueda().crearGrafo(listaVuelos);
-			
-			// Se busca el camino mas corto usando el algoritmo de disktra
-			List<PositionalList<Vertex<String>>> caminito = coordinador.getLogicaTipoBusqueda().caminoMasCorto(grafo, origen_abreviacion_seleccionado, destino_abreviacion_seleccionado,
-					comboBoxTipoBusqueda.getSelectedIndex());
-			
-			// Se obtiene la informacion a mostrar en pantalla
-			 //porq de objeto?
-			String caminoMasCorto = coordinador.getLogicaTipoBusqueda().obtenerBusqueda(grafo, caminito,comboBoxTipoBusqueda.getSelectedIndex());
-			
-			System.out.println("-----------------------------------------------");
-			System.out.println("----------------------------------------------");
-			System.out.println(caminoMasCorto);
-			lblMensaje.setText(caminoMasCorto);
-			
-			
-			System.out.println("---------------------------------------------");
-			System.out.println("----------------------------------------------");
-			/*for (Vertex<String> vertex : caminito) {
-				System.out.println(vertex.getElement());
-			}*/
-			coordinador.getVentanaMenu().getPanelMenu().removeAll();
-			coordinador.getVentanaMenu().getPanelMenu().add(coordinador.getInfoBusqueda());
-			coordinador.getVentanaMenu().getPanelMenu().revalidate();
-			coordinador.getVentanaMenu().getPanelMenu().repaint();
-			
-			
+
+			}
 
 		}
 

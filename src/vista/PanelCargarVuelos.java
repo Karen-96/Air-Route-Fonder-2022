@@ -420,12 +420,12 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 			//Recorto solo la abreviacion del aeropuerto origen
 			String origen = (String) comboBoxAeropuertosOrigen.getSelectedItem();
 			String[] parts = origen.split("-");
-			String origen_abreviacion = parts[0]; // abreviacion Origen
+			String origen_abreviacion = parts[0].trim(); // abreviacion Origen
 			
 			//Recorto solo la abreviacion del aeropuerto Destino
 			String destino = (String) comboBoxAeropuertosDestino.getSelectedItem();
 			String[] parts2 = destino.split("-");
-			String destino_abreviacion = parts2[0]; // abreviacion Destino	
+			String destino_abreviacion = parts2[0].trim(); // abreviacion Destino	
 			
 			
 			
@@ -492,12 +492,12 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 				//Obtengo el nuevo aeropuerto origen seleccionado del comboBox
 				String origen = (String) comboBoxAeropuertosOrigen.getSelectedItem();
 				String[] parts = origen.split("-");
-				String origen_abreviacion_seleccionado = parts[0]; // abreviacion Origen
+				String origen_abreviacion_seleccionado = parts[0].trim(); // abreviacion Origen
 				
 				//Obtengo el nuevo aeropuerto destino seleccionado del comboBox
 				String destino = (String) comboBoxAeropuertosDestino.getSelectedItem();
 				String[] parts2 = destino.split("-");
-				String destino_abreviacion_seleccionado = parts2[0]; // abreviacion Destino			
+				String destino_abreviacion_seleccionado = parts2[0].trim(); // abreviacion Destino			
 			
 				
 				//-------------------Transformo la fecha Date a un Timestamp--------------------------------------

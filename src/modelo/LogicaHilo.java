@@ -44,7 +44,15 @@ public class LogicaHilo implements Callable<PositionalList<Vertex<String>>>{
 
 	@Override
 	public PositionalList<Vertex<String>> call() throws Exception {
-		return GraphAlgorithms.shortestPathList(grafo, busqueda(grafo, origen), busqueda(grafo, destino));
+		PositionalList<Vertex<String>> aux = null;
+		
+		if(busqueda(grafo, origen) != null) {
+			if (busqueda(grafo, destino) != null) {
+				aux = GraphAlgorithms.shortestPathList(grafo, busqueda(grafo, origen), busqueda(grafo, destino));
+			}
+		}
+		
+		return aux;
 	}
 
 	public String getTipoBusqueda() {

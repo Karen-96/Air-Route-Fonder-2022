@@ -85,10 +85,6 @@ public class LogicaVuelo {
 	}
 
 	public List<VueloVo> validarConsultaVuelosFecha(String fecha) {
-		if(vueloDao.obtenerVuelosAllFecha(fecha).isEmpty()) {
-			JOptionPane.showMessageDialog(null,"No hay Vuelos para esa fecha, seleccione otra fecha","Advertencia",JOptionPane.WARNING_MESSAGE);
-			
-		}
 		return vueloDao.obtenerVuelosAllFecha(fecha);		
 	}
 	
