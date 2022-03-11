@@ -1,24 +1,25 @@
-package modelo;
+package logica;
 
-import java.sql.Timestamp;
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
-import javax.swing.JOptionPane;
-
 import controlador.Coordinador;
-import modelo.dao.BusquedaDao;
-import modelo.dao.VueloDao;
-import modelo.vo.AeropuertoVo;
-import modelo.vo.VueloVo;
+import dato.vo.AeropuertoVo;
+import dato.vo.VueloVo;
 import net.datastructures.AdjacencyMapGraph;
 import net.datastructures.Edge;
 import net.datastructures.Graph;
-import net.datastructures.GraphAlgorithms;
 import net.datastructures.Map;
 import net.datastructures.Position;
 import net.datastructures.PositionalList;
@@ -27,15 +28,14 @@ import net.datastructures.Vertex;
 
 public class LogicaTipoBusqueda {
 	private static final int TAM = 2; // Es el tamaño del arreglo de los totales.
-
-	private static Coordinador coordinador = new Coordinador(); // objeto miCoordinador que permite la relacion entre
-																// esta clase y la clase coordinador
-	private BusquedaDao busquedaDao;
-	private static List<AeropuertoVo> listaAeropuertos;
+	private static Coordinador coordinador; // objeto miCoordinador que permite la relacion entre esta clase y la clase
+											// coordinador
+	private static TreeMap<String, AeropuertoVo> listaAeropuertos;
+	private String mensaje = "";
 
 	public LogicaTipoBusqueda() {
-		busquedaDao = new BusquedaDao();
-		listaAeropuertos = new ArrayList<>();
+		listaAeropuertos = new TreeMap<>();
+		
 	}
 
 	public void setCoordinador(Coordinador coordinador) {
@@ -43,35 +43,54 @@ public class LogicaTipoBusqueda {
 	}
 
 	// valida que los campos no esten vacios
-	public boolean validarTipoDeBusqueda(VueloVo vueloVo, int itemTipoBusqueda) {
+	public String validarTipoDeBusqueda(VueloVo vueloVo, int itemTipoBusqueda) {
 		boolean verificacion = true;
-		if (vueloVo.getAeropuerto_origen() == "Seleccione" || vueloVo.getAeropuerto_destino() == "Seleccione"
-				|| itemTipoBusqueda == -1) {
-			JOptionPane.showMessageDialog(null, "Por favor Complete los datos", "Advertencia",
-					JOptionPane.WARNING_MESSAGE);
-			verificacion = false;
-
+		if (vueloVo.getAeropuerto_origen().getAbreviacion() == "Seleccione"
+				|| vueloVo.getAeropuerto_destino().getAbreviacion() == "Seleccione" || itemTipoBusqueda == -1) {
+			mensaje = "Por favor Complete los datos";
 		} else if (vueloVo.getAeropuerto_origen().equals(vueloVo.getAeropuerto_destino())) {
-			JOptionPane.showMessageDialog(null, "El Aeropuerto Origen debe ser distinto al Aeropuerto Destino",
-					"Advertencia", JOptionPane.WARNING_MESSAGE);
-			verificacion = false;
-
+			mensaje = "El Aeropuerto Origen debe ser distinto al Aeropuerto Destino";
 		} else if (itemTipoBusqueda == -1) {
-			JOptionPane.showMessageDialog(null, "Seleccione un tipo de busqueda", "Advertencia",
-					JOptionPane.WARNING_MESSAGE);
-			verificacion = false;
+			mensaje = "Seleccione un tipo de busqueda";
 		}
-		return verificacion;
-
+		return mensaje;
 	}
 
-	public Graph<String, VueloVo> crearGrafo(List<VueloVo> listaVuelos) {
-		return busquedaDao.crearGrafo(listaVuelos);
+	public static Graph<String, VueloVo> crearGrafo(List<VueloVo> edges) {
+		// Creo un grafo
+		Graph<String, VueloVo> grafo = new AdjacencyMapGraph<>(false);
+		// first pass to get sorted set of vertex labels
+		TreeSet<String> labels = new TreeSet<>();
+		// Obtiene los nodos de la lista y los agrega al TreeSet
+		for (VueloVo vueloVo : edges) {
+			labels.add(vueloVo.getAeropuerto_origen().getAbreviacion());
+			labels.add(vueloVo.getAeropuerto_destino().getAbreviacion());
+		}
+		// now create vertices (in alphabetical order)
+		// crea los vertice en orden alfabeticamente
+		HashMap<String, Vertex<String>> verts = new HashMap<>();
 
+		for (String label : labels)
+			verts.put(label, grafo.insertVertex(label));// grafo
+
+		// Inserta nuevos edge al grafo
+		for (VueloVo vueloVo : edges) {
+			VueloVo vuelo = new VueloVo();
+			vuelo.setDemora(vueloVo.getDemora());
+			vuelo.setFecha(vueloVo.getFecha());
+			vuelo.setIdvuelo(vueloVo.getIdvuelo());
+			vuelo.setNumero_vuelo(vueloVo.getNumero_vuelo());
+			vuelo.setPrecio(vueloVo.getPrecio());
+			vuelo.setTiempo_vuelo(vueloVo.getTiempo_vuelo());
+			grafo.insertEdge(verts.get(vueloVo.getAeropuerto_origen().getAbreviacion()), verts.get(vueloVo.getAeropuerto_destino().getAbreviacion()),
+					vuelo);
+		}
+		return grafo;
 	}
 
 	/**
-	 * Este método calcula el camino mas corto segun la opcion de los tipos de busqueda con hilos
+	 * Este método calcula el camino mas corto segun la opcion de los tipos de
+	 * busqueda con hilos
 	 * 
 	 * @param g        recibe el grafo principal.
 	 * @param orig     recibe el aeropuerto origen que el usuario eligio.
@@ -90,9 +109,6 @@ public class LogicaTipoBusqueda {
 		// Copio y creo los grafos para aplicar el algoritmo de disktra
 		Graph<String, Integer> grafo = masEconomico(g);
 		Graph<String, Integer> grafo2 = menosHoras(g);
-		
-
-		System.out.println("------------------------ hiloooo ---------------------------------");
 
 		// Creo los hilos
 		hilos.add(new FutureTask(new LogicaHilo(grafo, origen, destino, "Mas Economico")));// mas economico
@@ -111,15 +127,12 @@ public class LogicaTipoBusqueda {
 
 		// Me aseguro que todos los hilos finalicen y devuelvan un valor.
 		while (true) {
-
 			finProcesos = true;
-
 			for (FutureTask hilo : hilos) {
 				if (!hilo.isDone()) {
 					finProcesos = false;
 				}
 			}
-
 			if (finProcesos) {
 				for (FutureTask hilo : hilos) {
 					try {
@@ -132,26 +145,20 @@ public class LogicaTipoBusqueda {
 				break;
 			}
 		}
-
 		// Finalizo el ExecutorService
 		es.shutdown();
-
 		boolean verif = true;
-		//Verifico que las lista no esten nulas
+		// Verifico que las lista no esten nulas
 		for (PositionalList<Vertex<String>> positionalList : listCaminos) {
-			if(positionalList == null) {
+			if (positionalList == null) {
 				verif = false;
 			}
 		}
-		
 		// Se añade el menos escala
-		if(verif) {
+		if (verif) {
 			listCaminos.add(menosEscalas(listCaminos.get(0), listCaminos.get(1)));
 		}
-		
-
 		return listCaminos;
-
 	}
 
 	/**
@@ -177,8 +184,6 @@ public class LogicaTipoBusqueda {
 			String hora = arco.getElement().getTiempo_vuelo();
 			String[] parts1 = hora.split(":");
 			Integer tiempo_vuelo = Integer.parseInt(parts1[0] + parts1[1]);
-			System.out.println(tiempo_vuelo);
-
 			vertice = grafos.endVertices(arco);
 			grafo.insertEdge(mapaVertice.get(vertice[0]), mapaVertice.get(vertice[1]), (tiempo_vuelo));// origen,
 																										// destino y
@@ -211,12 +216,8 @@ public class LogicaTipoBusqueda {
 		for (Edge<VueloVo> arco : grafos.edges()) { // recorre el grafo trayendo los arcos
 			vertice = grafos.endVertices(arco); // obtiene los vertice que estan en el extremo del arco
 			// inserta en el nuevo grafo el precio
-			grafo.insertEdge(mapaVertice.get(vertice[0]), mapaVertice.get(vertice[1]), arco.getElement().getPrecio());// origen,
-																														// destino
-																														// y
-																														// precio
+			grafo.insertEdge(mapaVertice.get(vertice[0]), mapaVertice.get(vertice[1]), arco.getElement().getPrecio());
 		}
-
 		return grafo;
 	}
 
@@ -258,6 +259,7 @@ public class LogicaTipoBusqueda {
 		String[] edge = new String[caminoCorto.get(tipoBusqueda).size()];
 		Object[] totales = new Object[TAM];
 		ArrayList<Object[]> mostrar = new ArrayList<>();
+		
 
 		/**
 		 * [0] mas economico [1] menos horas [2] menos escalas
@@ -287,25 +289,21 @@ public class LogicaTipoBusqueda {
 			String abreviacionVuelo = vertices.get(i).getElement();
 			// Busca la abreviacion en la lista de los aeropuertos y guarda el nombre para
 			// mostrar en los paneles
-			for (AeropuertoVo aeropuertoVo : listaAeropuertos) {
-				if (aeropuertoVo.getAbreviacion().equals(abreviacionVuelo.trim())) {
-					nombreVuelo = aeropuertoVo;
+			for (Entry<String, AeropuertoVo> aeropuertoVo : listaAeropuertos.entrySet()) {
+				if (aeropuertoVo.getValue().getAbreviacion().equals(abreviacionVuelo.trim())) {
+					nombreVuelo = aeropuertoVo.getValue();
 				}
 			}
-
+			
 			fechaVuelo[i] = (i < vuelo.size() ? vuelo.get(i).getFecha().toString() : "");
 			caminoNombre[i] = "(" + vertices.get(i).getElement() + ") " + nombreVuelo.getNombre();
-			edge[i] = (i < vuelo.size() ? "&nbsp;&nbsp;&nbsp; ~ &nbsp;Nombre de Vuelo:&nbsp;"
+			edge[i] = (i < vuelo.size() ? "&nbsp;&nbsp;&nbsp; ~ &nbsp;N° Vuelo:&nbsp;"
 					+ vuelo.get(i).getNumero_vuelo() + "<br> &nbsp;&nbsp;&nbsp; ~ &nbsp; Precio:$&nbsp;"
 					+ vuelo.get(i).getPrecio() + "<br> &nbsp;&nbsp;&nbsp; ~ &nbsp; Demora en Aeropuerto:&nbsp;"
 					+ vuelo.get(i).getDemora() + "<br> &nbsp;&nbsp;&nbsp; ~ &nbsp; Horas de Vuelo:&nbsp;"
 					+ vuelo.get(i).getTiempo_vuelo() + " hs." : "");
-
-			System.out
-					.println("tiempo vuelo sin formatear: " + (i < vuelo.size() ? vuelo.get(i).getTiempo_vuelo() : 0));
 			String tiempo = (i < vuelo.size() ? vuelo.get(i).getTiempo_vuelo() : "");
 			String[] tiempoVuelo = tiempo.split(":");
-
 			hora = (tiempoVuelo.length < 2 ? 0 : Integer.parseInt(tiempoVuelo[0]));
 			minutos = (tiempoVuelo.length < 2 ? 0 : Integer.parseInt(tiempoVuelo[1]));
 			totalHora += hora;
@@ -317,22 +315,10 @@ public class LogicaTipoBusqueda {
 				totalHora = totalHora;
 				totalMinuto = totalMinuto;
 			}
-
-			totalPrecio += (i < vuelo.size() ? vuelo.get(i).getPrecio() : 0);
-
-			/*
-			 * mensaje += "" + vertices.get(i).getElement() + "<br>    " + (i < vuelo.size()
-			 * ? vuelo.get(i).getPrecio() : "") + "<br>      " + (i < vuelo.size() ?
-			 * vuelo.get(i).getDemora() : "") + "<br>     " + (i < vuelo.size() ?
-			 * vuelo.get(i).getTiempo_vuelo() : "") + "    ";
-			 */
+			totalPrecio += (i < vuelo.size() ? vuelo.get(i).getPrecio() : 0);	
 
 		}
 		String horas = String.valueOf(totalHora + ":" + totalMinuto + " hs");
-		System.out.println("valueOf : " + horas);
-		// mensaje = "caminoNombre: " + caminoNombre +"Total hora = "+totalHora +" total
-		// minutos: "+ totalMinuto + " precio: "+totalPrecio;
-
 		totales[0] = totalPrecio + "";
 		totales[1] = horas;
 		mostrar.add(fechaVuelo);

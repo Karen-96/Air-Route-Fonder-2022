@@ -8,23 +8,19 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
+import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
-import javax.swing.ComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -42,9 +38,8 @@ import javax.swing.text.MaskFormatter;
 import com.toedter.calendar.JDateChooser;
 
 import controlador.Coordinador;
-import modelo.vo.AeropuertoVo;
-import modelo.vo.VueloVo;
-import javax.swing.JFormattedTextField;
+import dato.vo.AeropuertoVo;
+import dato.vo.VueloVo;
 
 public class PanelCargarVuelos extends JPanel implements ActionListener{
 	 
@@ -84,15 +79,16 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 	private JTextField textNumeroVuelo;
 	
 	private SimpleDateFormat dateFormat;
-	private List<AeropuertoVo> listaAeropuertos;
-	private JButton btnVolver;
+	private TreeMap<String, AeropuertoVo> listaAeropuertos;
 	private VueloVo vuelovo;
+	private JTextField textBuscar;
+	private JButton btnVolver;
 	
 	//Constructor
 	public PanelCargarVuelos() {
 		vuelovo = new VueloVo();
 		dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-		listaAeropuertos = new ArrayList<>();
+		listaAeropuertos = new TreeMap<>();
 		wrongBorder = BorderFactory.createLineBorder(Color.RED);
 		validateBorder = BorderFactory.createLineBorder(Color.GREEN);
 		model = new DefaultTableModel();
@@ -206,14 +202,15 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 				AeropuertoVo aeropuertoDest = null;
 				String aeropuertoOrigen = (String) model.getValueAt(fila, 2); 
 				String aeropuertoDestino = (String) model.getValueAt(fila, 3); 
-				for (AeropuertoVo aeropuertoVo : listaAeropuertos) {					
-					if (aeropuertoVo.getAbreviacion().equals(aeropuertoOrigen.trim())) {
-						aeropuertoOrgn = aeropuertoVo;
-					}					
-					if (aeropuertoVo.getAbreviacion().equals(aeropuertoDestino.trim())) {
-						aeropuertoDest = aeropuertoVo;
-					}									
-				}				
+				
+				for (Entry<String, AeropuertoVo> aeropuertoVo : listaAeropuertos.entrySet()) {
+					if (aeropuertoVo.getValue().getAbreviacion().equals(aeropuertoOrigen.trim())) {
+						aeropuertoOrgn = aeropuertoVo.getValue();
+					}
+					if (aeropuertoVo.getValue().getAbreviacion().equals(aeropuertoDestino.trim())) {
+						aeropuertoDest = aeropuertoVo.getValue();
+					}
+				}		
 			    comboBoxAeropuertosOrigen.setSelectedItem(aeropuertoOrgn.getAbreviacion()+" - "+aeropuertoOrgn.getNombre());
 				comboBoxAeropuertosDestino.setSelectedItem(aeropuertoDest.getAbreviacion()+" - "+aeropuertoDest.getNombre());
 				intPrecio.setValue(model.getValueAt(fila, 4));
@@ -342,17 +339,38 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 		textNumeroVuelo.setColumns(10);
 		
 		JSeparator separator_1 = new JSeparator();
-		separator_1.setBounds(44, 57, 1024, 4);
+		separator_1.setBounds(32, 59, 1036, 2);
 		panel.add(separator_1);
 		
 		JSeparator separator_1_1 = new JSeparator();
-		separator_1_1.setBounds(44, 196, 1024, 4);
+		separator_1_1.setBounds(33, 198, 1035, 2);
 		panel.add(separator_1_1);
 		
-		//Boton para volver al menu
-		btnVolver = new JButton("Volver");
-		btnVolver.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnVolver.setBounds(44, 23, 97, 23);
+		JLabel lblNewLabel = new JLabel("");
+		lblNewLabel.setIcon(new ImageIcon(PanelCargarVuelos.class.getResource("/recursos/buscar.png")));
+		lblNewLabel.setBounds(33, 196, 33, 40);
+		panel.add(lblNewLabel);
+		
+		JLabel lblBuscar = new JLabel("Buscar :");
+		lblBuscar.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		lblBuscar.setBounds(68, 207, 72, 25);
+		panel.add(lblBuscar);
+		
+		textBuscar = new JTextField();
+		textBuscar.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				buscarVuelo(textBuscar.getText());
+			}
+		});
+		textBuscar.setColumns(10);
+		textBuscar.setBounds(144, 207, 326, 29);
+		panel.add(textBuscar);
+		
+		btnVolver = new JButton("");
+		btnVolver.setIcon(new ImageIcon(PanelCargarVuelos.class.getResource("/recursos/iconovolver.png")));
+		btnVolver.setToolTipText("Volver al men\u00FA");
+		btnVolver.setBounds(33, 21, 46, 23);
 		btnVolver.addActionListener(this);
 		panel.add(btnVolver);
 	}
@@ -374,13 +392,18 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 		for (int i = 0; i < listaVuelos.size(); i++) {				
 			fila[0] = listaVuelos.get(i).getNumero_vuelo();
 			fila[1] = dateFormat.format(listaVuelos.get(i).getFecha());
-			fila[2] = listaVuelos.get(i).getAeropuerto_origen();
-			fila[3] = listaVuelos.get(i).getAeropuerto_destino();
+			fila[2] = listaVuelos.get(i).getAeropuerto_origen().getAbreviacion();
+			fila[3] = listaVuelos.get(i).getAeropuerto_destino().getAbreviacion();
 			fila[4]= listaVuelos.get(i).getPrecio();
 			fila[5]=listaVuelos.get(i).getTiempo_vuelo();
 			fila[6]=listaVuelos.get(i).getDemora();
 			((DefaultTableModel) tableVuelos.getModel()).addRow(fila);
 		}
+	}
+	
+	public void buscarVuelo(String buscar) {		
+		DefaultTableModel modelo = coordinador.getVueloDao().buscarVuelo(buscar);		
+		tableVuelos.setModel(modelo);		
 	}
 
 	public void setCoordinador(Coordinador coordinador) {
@@ -390,10 +413,12 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 	//Metodo para llenar los comboBox con los Aeropuertos(abreviacion,nombre)
 	public void mostrarAeropuertosComboBox() {
 		listaAeropuertos = coordinador.getLogicaAeropuerto().validarConsultaAeropuerto();
-		for (int i = 0; i<listaAeropuertos.size(); i++) {
-			comboBoxAeropuertosOrigen.addItem(listaAeropuertos.get(i).getAbreviacion()+" - "+listaAeropuertos.get(i).getNombre());
-			comboBoxAeropuertosDestino.addItem(listaAeropuertos.get(i).getAbreviacion()+" - "+listaAeropuertos.get(i).getNombre());			
-		}	
+		for (Entry<String, AeropuertoVo> aeropuertoVo : listaAeropuertos.entrySet()) {
+			comboBoxAeropuertosOrigen
+					.addItem(aeropuertoVo.getValue().getAbreviacion() + " - " + aeropuertoVo.getValue().getNombre());
+			comboBoxAeropuertosDestino
+					.addItem(aeropuertoVo.getValue().getAbreviacion() + " - " + aeropuertoVo.getValue().getNombre());
+		}
 	}
 	
 	//Metodo para setear los campos y poder llenar otro vuelo
@@ -416,7 +441,6 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		//Si se presiona el boton agregar, agrega un vuelo
 		if(e.getSource()==btnAgregar) {
-			System.out.println("hora tiempo vuelo"+horaTiempoVuelo.getText());
 			//Recorto solo la abreviacion del aeropuerto origen
 			String origen = (String) comboBoxAeropuertosOrigen.getSelectedItem();
 			String[] parts = origen.split("-");
@@ -441,20 +465,24 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 			java.sql.Timestamp fecha = new java.sql.Timestamp(d);
 			//------------------------------------------------------------------------------------------------	
 			
-			vuelovo.setAeropuerto_origen(origen_abreviacion);
-			vuelovo.setAeropuerto_destino(destino_abreviacion);
+			vuelovo.setAeropuerto_origen(listaAeropuertos.get(origen_abreviacion));
+			vuelovo.setAeropuerto_destino(listaAeropuertos.get(destino_abreviacion));
 			vuelovo.setNumero_vuelo(textNumeroVuelo.getText());
 			vuelovo.setFecha(fecha);
 			vuelovo.setPrecio((int) intPrecio.getValue());
 			vuelovo.setDemora(horaDemora.getText());
 			vuelovo.setTiempo_vuelo(horaTiempoVuelo.getText());
 			
-			boolean verificacion = coordinador.getLogicaVuelo().validarRegistroVuelo(vuelovo);
-			if (verificacion) {
+			String verificacion = coordinador.getLogicaVuelo().validarRegistroVuelo(vuelovo);
+			if (verificacion.isEmpty()) {
 				// Si se registro se refresca la tabla
+				coordinador.getVueloDao().registrarVuelo(vuelovo);
 				completarTablaVuelos();
+				limpiar();
+			}else {
+				JOptionPane.showMessageDialog(null,verificacion,"Advertencia",JOptionPane.WARNING_MESSAGE);
 			}
-			limpiar();			
+						
 		}
 		//Si se presiona el boton eliminar, elimina un vuelo
 		if(e.getSource()==btnEliminar) {
@@ -508,16 +536,18 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 				
 				vuelovo.setNumero_vuelo(textNumeroVuelo.getText());
 				vuelovo.setFecha(fecha);
-				vuelovo.setAeropuerto_origen(origen_abreviacion_seleccionado);
-				vuelovo.setAeropuerto_destino(destino_abreviacion_seleccionado);
+				vuelovo.setAeropuerto_origen(listaAeropuertos.get(origen_abreviacion_seleccionado));
+				vuelovo.setAeropuerto_destino(listaAeropuertos.get(destino_abreviacion_seleccionado));
 				vuelovo.setPrecio((int) intPrecio.getValue());
 				vuelovo.setTiempo_vuelo(horaTiempoVuelo.getText());
 				vuelovo.setDemora(horaDemora.getText());
 				
-				boolean verificacion = coordinador.getLogicaVuelo().validarModificacion(vuelovo,numero_vuelo_viejo);
-				if (verificacion) {
+				String verificacion = coordinador.getLogicaVuelo().validarModificacion(vuelovo,numero_vuelo_viejo);
+				if (verificacion.isEmpty()) {
 					// Si se registro se refresca la tabla
 					completarTablaVuelos();
+				}else {
+					JOptionPane.showMessageDialog(null,verificacion,"Advertencia",JOptionPane.WARNING_MESSAGE);
 				}
 				limpiar(); 
 				
@@ -525,12 +555,12 @@ public class PanelCargarVuelos extends JPanel implements ActionListener{
 				JOptionPane.showMessageDialog(null, "Por favor seleccione una fila");
 			}				
 		}
-		//Si se presiono el boton volver, vuelve a la pantalla Menu
-		if(e.getSource()==btnVolver) {
+		if(e.getSource() == btnVolver) {
 			coordinador.getVentanaMenu().getPanelMenu().removeAll(); 
 			coordinador.getVentanaMenu().getPanelMenu().add(coordinador.getPanelMenu());
 			coordinador.getVentanaMenu().getPanelMenu().revalidate();
-			coordinador.getVentanaMenu().getPanelMenu().repaint();			
-		}	
+			coordinador.getVentanaMenu().getPanelMenu().repaint();
+			
+		}
 	}
 }

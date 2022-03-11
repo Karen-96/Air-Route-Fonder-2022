@@ -8,6 +8,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -23,10 +25,9 @@ import javax.swing.border.EmptyBorder;
 import com.toedter.calendar.JDateChooser;
 
 import controlador.Coordinador;
-import modelo.vo.AeropuertoVo;
-import modelo.vo.VueloVo;
+import dato.vo.AeropuertoVo;
+import dato.vo.VueloVo;
 import net.datastructures.Graph;
-import net.datastructures.Position;
 import net.datastructures.PositionalList;
 import net.datastructures.Vertex;
 
@@ -60,7 +61,7 @@ public class PanelMenu extends JPanel implements ActionListener {
 	private JButton btnBuscarVuelo;
 	private JComboBox comboBoxTipoBusqueda;
 	private JLabel lblTipoBusqueda;
-	private List<AeropuertoVo> listaAeropuertos;
+	private TreeMap<String, AeropuertoVo> listaAeropuertos;
 	private List<VueloVo> listaVuelos;
 	private String origen_abreviacion_seleccionado;
 	private String destino_abreviacion_seleccionado;
@@ -73,7 +74,7 @@ public class PanelMenu extends JPanel implements ActionListener {
 	 * Create the panel.
 	 */
 	public PanelMenu() {
-		listaAeropuertos = new ArrayList<>();
+		listaAeropuertos = new TreeMap<>();
 		listaVuelos = new ArrayList();
 		vueloVo = new VueloVo();
 		iniciarComponentes();
@@ -93,7 +94,7 @@ public class PanelMenu extends JPanel implements ActionListener {
 
 		comboBoxTipoBusqueda = new JComboBox();
 		comboBoxTipoBusqueda
-				.setModel(new DefaultComboBoxModel(new String[] { "Economico", "Menos horas", "Menos escalas" }));
+				.setModel(new DefaultComboBoxModel(new String[] { "Económico", "Menos horas", "Menos escalas" }));
 		comboBoxTipoBusqueda.setSelectedItem(null);
 		comboBoxTipoBusqueda.setBounds(483, 339, 304, 22);
 		add(comboBoxTipoBusqueda);
@@ -173,17 +174,19 @@ public class PanelMenu extends JPanel implements ActionListener {
 	}
 
 	public void mostrarAeropuertosComboBox() {
-		listaAeropuertos = coordinador.getLogicaAeropuerto().validarConsultaAeropuerto();
-		for (int i = 0; i < listaAeropuertos.size(); i++) {
+		listaAeropuertos = coordinador.getLogicaAeropuerto().validarConsultaAeropuerto();		
+		for (Entry<String, AeropuertoVo> aeropuertoVo : listaAeropuertos.entrySet()) {
 			comboBoxAeropuertoOrigen
-					.addItem(listaAeropuertos.get(i).getAbreviacion() + " - " + listaAeropuertos.get(i).getNombre());
+					.addItem(aeropuertoVo.getValue().getAbreviacion() + " - " + aeropuertoVo.getValue().getNombre());
 			comboBoxAeropuertoDestino
-					.addItem(listaAeropuertos.get(i).getAbreviacion() + " - " + listaAeropuertos.get(i).getNombre());
+					.addItem(aeropuertoVo.getValue().getAbreviacion() + " - " + aeropuertoVo.getValue().getNombre());
 		}
+
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		//Si presiona el boton Cargar Datos muestra los paneles de aeropuerto y vuelo
 		if (e.getSource() == btnCargarDatos) {
 			pestañas = new JTabbedPane();
 			pestañas.setBounds(0, 0, 1270, 717);
@@ -204,12 +207,12 @@ public class PanelMenu extends JPanel implements ActionListener {
 			coordinador.getVentanaMenu().getPanelMenu().repaint();
 
 		}
+		//Si presiona el boton de buscar vuelo 
 		if (e.getSource() == btnBuscarVuelo) {
 			// Obtengo el nuevo aeropuerto origen seleccionado del comboBox
 			String origen = (String) comboBoxAeropuertoOrigen.getSelectedItem();
 			String[] parts = origen.split("-");
 			origen_abreviacion_seleccionado = parts[0].trim(); // abreviacion Origen
-			
 
 			// Obtengo el nuevo aeropuerto destino seleccionado del comboBox
 			String destino = (String) comboBoxAeropuertoDestino.getSelectedItem();
@@ -220,36 +223,35 @@ public class PanelMenu extends JPanel implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Por favor seleccione una fecha");
 			}
 
-			// -------------------Transformo la fecha Date a un
-			// Timestamp--------------------------------------
+			// Transformo la fecha Date a un Timestamp-------------------
 			Date date = dateChooserFechaHora.getDate();
 			long d = date.getTime();
 			java.sql.Timestamp fecha = new java.sql.Timestamp(d);
-			// ------------------------------------------------------------------------------------------------
-
-			vueloVo.setAeropuerto_origen(origen_abreviacion_seleccionado);
-			vueloVo.setAeropuerto_destino(destino_abreviacion_seleccionado);
+			// ----------------------------------------------------------
+			
+			vueloVo.setAeropuerto_origen(listaAeropuertos.get(origen_abreviacion_seleccionado));
+			vueloVo.setAeropuerto_destino(listaAeropuertos.get(destino_abreviacion_seleccionado));
 			vueloVo.setFecha(fecha);
 
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			Date fechaSeleccionada = dateChooserFechaHora.getDate();
-			System.out.println(dateFormat.format(fechaSeleccionada)); // 2013/10/15 16:16:39
 
 			// Trae el numero que seleccino el usuario para el tipo de busqueda
 			int itemTipoBusqueda = comboBoxTipoBusqueda.getSelectedIndex();
 
 			// Valida que los campos esten correctamente los datos para buscar el vuelo
-			boolean verificacion = coordinador.getLogicaTipoBusqueda().validarTipoDeBusqueda(vueloVo, itemTipoBusqueda);
+			String verificacion = coordinador.getLogicaTipoBusqueda().validarTipoDeBusqueda(vueloVo, itemTipoBusqueda);
 			System.out.println(verificacion);
-			if (verificacion) {
+			if (verificacion.isEmpty()) {
 				// Busca los vuelos dependiendo la fecha que seleccione el usuario
 				List<VueloVo> listaVuelos = coordinador.getLogicaVuelo()
 						.validarConsultaVuelosFecha(dateFormat.format(fechaSeleccionada));
-				
-				if(listaVuelos.isEmpty()) {
-					JOptionPane.showMessageDialog(null,"No hay Vuelos para esa fecha, seleccione otra fecha","Advertencia",JOptionPane.WARNING_MESSAGE);
-									
-				}else {
+
+				if (listaVuelos.isEmpty()) {
+					JOptionPane.showMessageDialog(null, "No hay Vuelos para esa fecha, seleccione otra fecha",
+							"Advertencia", JOptionPane.WARNING_MESSAGE);
+
+				} else {
 					// Crea el grafo con los vuelos que se busque dependiendo de la fecha que
 					// ingrese el usuario
 					grafo = coordinador.getLogicaTipoBusqueda().crearGrafo(listaVuelos);
@@ -257,15 +259,10 @@ public class PanelMenu extends JPanel implements ActionListener {
 					for (Vertex<String> vueloVo : grafo.vertices()) {
 						System.out.println(vueloVo.getElement());
 					}
-					System.out.println("Origen:    "+ origen_abreviacion_seleccionado);
-				    System.out.println("Destino:   "+ destino_abreviacion_seleccionado);
-					
-					
 					// Se busca el camino mas corto usando el algoritmo de disktra
 					List<PositionalList<Vertex<String>>> caminito = coordinador.getLogicaTipoBusqueda().caminoMasCorto(
 							grafo, origen_abreviacion_seleccionado, destino_abreviacion_seleccionado,
 							comboBoxTipoBusqueda.getSelectedIndex());
-					
 					boolean verf = true;
 					// verifico que las listas no esten vacias
 					for (PositionalList<Vertex<String>> list : caminito) {
@@ -277,8 +274,8 @@ public class PanelMenu extends JPanel implements ActionListener {
 					if (verf) {
 						// Se obtiene la informacion a mostrar en pantalla
 						// porq de objeto?
-						ArrayList<Object[]> caminoMasCortoEconomico = coordinador.getLogicaTipoBusqueda().obtenerBusqueda(grafo,
-								caminito, 0);
+						ArrayList<Object[]> caminoMasCortoEconomico = coordinador.getLogicaTipoBusqueda()
+								.obtenerBusqueda(grafo, caminito, 0);
 						ArrayList<Object[]> caminoMasCortoMenosHoras = coordinador.getLogicaTipoBusqueda()
 								.obtenerBusqueda(grafo, caminito, 1);
 						ArrayList<Object[]> caminoMasCortoMenosEscalas = coordinador.getLogicaTipoBusqueda()
@@ -287,11 +284,14 @@ public class PanelMenu extends JPanel implements ActionListener {
 						pestañasBusqueda = new JTabbedPane();
 						pestañasBusqueda.setBounds(0, 0, 1270, 717);
 						busquedaEconomico = new PanelBusquedaEconomico(caminoMasCortoEconomico);
+						busquedaEconomico.setCoordinador(coordinador);
 						busquedaMenosHoras = new PanelBusquedaMenosHoras(caminoMasCortoMenosHoras);
 						busquedaMenosEscala = new PanelBusquedaMenosEscala(caminoMasCortoMenosEscalas);
 
-						// Muestro las pestañas dependiendo la seleccion del Usuario pero con los 3
-						// metodos de busquedas ya realizados por hilos
+						/* Muestro las pestañas dependiendo la seleccion del Usuario pero con los 3
+						 * metodos de busquedas ya realizados por hilos
+						 * 
+						 */
 						if (comboBoxTipoBusqueda.getSelectedIndex() == 0) {
 							pestañasBusqueda.add("Económico", busquedaEconomico);
 							pestañasBusqueda.setFont(new Font("Arial", Font.PLAIN, 20));
@@ -322,18 +322,16 @@ public class PanelMenu extends JPanel implements ActionListener {
 							coordinador.getVentanaMenu().getPanelMenu().repaint();
 
 						}
-						
-					}else {
-						JOptionPane.showMessageDialog(null, "Error","Grafo Nulo", JOptionPane.ERROR_MESSAGE);
+
+					} else {
+						JOptionPane.showMessageDialog(null, "No hay Vuelos programados, Ingrese otro vuelo", "Advertencia", JOptionPane.ERROR_MESSAGE);
 
 					}
-										
-					
-					
+
 				}
 
-			
-
+			}else {
+				JOptionPane.showMessageDialog(null,verificacion,"Advertencia", JOptionPane.WARNING_MESSAGE);
 			}
 
 		}

@@ -1,12 +1,11 @@
 package controlador;
 
-import modelo.LogicaAeropuerto;
-import modelo.LogicaHilo;
-import modelo.LogicaTipoBusqueda;
-import modelo.LogicaVuelo;
+import dato.dao.AeropuertoDao;
+import dato.dao.VueloDao;
+import logica.LogicaAeropuerto;
+import logica.LogicaTipoBusqueda;
+import logica.LogicaVuelo;
 import vista.PanelBusquedaEconomico;
-import vista.PanelBusquedaMenosEscala;
-import vista.PanelBusquedaMenosHoras;
 import vista.PanelCargarAeropuertos;
 import vista.PanelCargarVuelos;
 import vista.PanelMenu;
@@ -22,7 +21,8 @@ public class Aplicacion {
 	private PanelCargarAeropuertos cargarAeropuertos;
 	private PanelCargarVuelos cargarVuelos;
 	private Coordinador coordinador;
-
+	private VueloDao vueloDao;
+	private AeropuertoDao aeropuertoDao;
 	public static void main(String[] args) {
 		Aplicacion aplicacion = new Aplicacion();
 		aplicacion.iniciar();
@@ -41,6 +41,8 @@ public class Aplicacion {
 		cargarAeropuertos = new PanelCargarAeropuertos();
 		cargarVuelos = new PanelCargarVuelos();
 		panelMenu = new PanelMenu();
+		vueloDao = new VueloDao();
+		aeropuertoDao = new AeropuertoDao();
 	
 
 		/* Se establecen las relaciones entre clases */
@@ -51,6 +53,8 @@ public class Aplicacion {
 		logicaAeropuerto.setCoordinador(coordinador);
 		logicaVuelo.setCoordinador(coordinador);
 		logicaTipoBusqueda.setCoordinador(coordinador);
+		vueloDao.setCoordinador(coordinador);
+		aeropuertoDao.setCoordinador(coordinador);
 
 		/* Se establecen relaciones con la clase coordinador */
 		coordinador.setVentanaMenu(ventanaMenu);
@@ -60,7 +64,9 @@ public class Aplicacion {
 		coordinador.setLogicaAeropuerto(logicaAeropuerto);
 		coordinador.setLogicaVuelo(logicaVuelo);
 		coordinador.setLogicaTipoBusqueda(logicaTipoBusqueda);
-
+		coordinador.setVueloDao(vueloDao);
+		coordinador.setAeropuertoDao(aeropuertoDao);
+		
 		// Muestra la aplicaion en pantalla
 		ventanaMenu.iniciarComponentes();
 		ventanaMenu.setVisible(true);

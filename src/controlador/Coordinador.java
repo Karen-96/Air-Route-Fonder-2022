@@ -1,12 +1,12 @@
 package controlador;
 
-import modelo.LogicaAeropuerto;
-import modelo.LogicaHilo;
-import modelo.LogicaTipoBusqueda;
-import modelo.LogicaVuelo;
+import dato.dao.AeropuertoDao;
+import dato.dao.VueloDao;
+import logica.LogicaAeropuerto;
+import logica.LogicaHilo;
+import logica.LogicaTipoBusqueda;
+import logica.LogicaVuelo;
 import vista.PanelBusquedaEconomico;
-import vista.PanelBusquedaMenosEscala;
-import vista.PanelBusquedaMenosHoras;
 import vista.PanelCargarAeropuertos;
 import vista.PanelCargarVuelos;
 import vista.PanelMenu;
@@ -22,6 +22,8 @@ public class Coordinador {
 	private PanelCargarAeropuertos cargarAeropuertos;
 	private PanelCargarVuelos cargarVuelos;
 	private PanelMenu panelMenu;
+	private VueloDao vueloDao;
+	private AeropuertoDao aeropuertoDao;
 
 	public LogicaAeropuerto getLogicaAeropuerto() {
 		return logicaAeropuerto;
@@ -86,12 +88,29 @@ public class Coordinador {
 	public void setLogicaHilo(LogicaHilo logicaHilo) {
 		this.logicaHilo = logicaHilo;
 	}
+
+	public VueloDao getVueloDao() {
+		return vueloDao;
+	}
+
+	public void setVueloDao(VueloDao vueloDao) {
+		this.vueloDao = vueloDao;
+	}
+	
+
+	public AeropuertoDao getAeropuertoDao() {
+		return aeropuertoDao;
+	}
+
+	public void setAeropuertoDao(AeropuertoDao aeropuertoDao) {
+		this.aeropuertoDao = aeropuertoDao;
+	}	
+	
 	
 	
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	
 
 	public void mostrarVentanaMenu() {
 		ventanaMenu.setVisible(true);

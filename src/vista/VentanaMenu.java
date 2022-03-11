@@ -19,20 +19,6 @@ public class VentanaMenu extends JFrame{
 	private Coordinador coordinador; //objeto miCoordinador que permite la relacion entre esta clase y la clase coordinador
 	private JPanel panelMenu;
 	
-	//Ver esto
-	private PanelCargarAeropuertos cargarAeropuertos;
-	private PanelCargarVuelos cargarVuelos;
-	private PanelMenu panelMenuBusqueda;
-
-	
-	
-	
-	/**
-	 * Establece la informacion que se presentara como introduccion del sistema
-	 */
-	public String textoIntroduccion = "";
-	
-	
 	public VentanaMenu() {
 		
 	}
@@ -61,9 +47,6 @@ public class VentanaMenu extends JFrame{
 	public void setCoordinador(Coordinador coordinador) {
 		this.coordinador = coordinador;
 	}
-	
-
-
 
 	public JPanel getPanelMenu() {
 		return panelMenu;

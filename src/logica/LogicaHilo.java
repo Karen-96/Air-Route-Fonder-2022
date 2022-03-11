@@ -1,4 +1,4 @@
-package modelo;
+package logica;
 
 import java.util.concurrent.Callable;
 

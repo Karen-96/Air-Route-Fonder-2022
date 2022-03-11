@@ -1,4 +1,4 @@
-package modelo.vo;
+package dato.vo;
 
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -9,8 +9,8 @@ public class VueloVo {
 	private String numero_vuelo;
 	private Timestamp fecha;
 	private int precio;
-	private String aeropuerto_origen;
-	private String aeropuerto_destino;
+	private AeropuertoVo aeropuerto_origen;
+	private AeropuertoVo aeropuerto_destino;
 	private String tiempo_vuelo;
 	private String demora;
 	
@@ -47,21 +47,22 @@ public class VueloVo {
 		this.precio = precio;
 	}
 	
-	public String getAeropuerto_origen() {
+	public AeropuertoVo getAeropuerto_origen() {
 		return aeropuerto_origen;
 	}
-	
-	public void setAeropuerto_origen(String aeropuerto_origen) {
+
+	public void setAeropuerto_origen(AeropuertoVo aeropuerto_origen) {
 		this.aeropuerto_origen = aeropuerto_origen;
 	}
-	
-	public String getAeropuerto_destino() {
+
+	public AeropuertoVo getAeropuerto_destino() {
 		return aeropuerto_destino;
 	}
-	
-	public void setAeropuerto_destino(String aeropuerto_destino) {
+
+	public void setAeropuerto_destino(AeropuertoVo aeropuerto_destino) {
 		this.aeropuerto_destino = aeropuerto_destino;
 	}
+
 	public String getTiempo_vuelo() {
 		return tiempo_vuelo;
 	}
@@ -76,6 +77,30 @@ public class VueloVo {
 
 	public void setDemora(String demora) {
 		this.demora = demora;
+	}
+	
+	
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + idvuelo;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		VueloVo other = (VueloVo) obj;
+		if (idvuelo != other.idvuelo)
+			return false;
+		return true;
 	}
 
 	@Override
