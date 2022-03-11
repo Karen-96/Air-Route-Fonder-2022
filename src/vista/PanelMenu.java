@@ -194,7 +194,6 @@ public class PanelMenu extends JPanel implements ActionListener {
 			cargarVuelos.mostrarAeropuertosComboBox();
 			;
 			cargarVuelos.completarTablaVuelos();
-
 			cargarAeropuertos = coordinador.getCargarAeropuertos();
 			cargarAeropuertos.completarTablaAeropuerto();
 

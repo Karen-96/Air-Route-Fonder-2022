@@ -95,9 +95,8 @@ public class LogicaTipoBusqueda {
 	 * @param g        recibe el grafo principal.
 	 * @param orig     recibe el aeropuerto origen que el usuario eligio.
 	 * @param dest     recibe el aeropuerto destino que el usuario eligio.
-	 * @param busqueda recibe el tipo de busqueda que el usuario eligio.
-	 * @return PositionalList<Vertex<String>> contiene los nodos que hacen el camino
-	 *         mas corto.
+	 * @param tipoBusqueda recibe el tipo de busqueda que el usuario eligio.
+	 * @return listaCamino contiene la lista de los tipos de busqueda -> [0] mas economico [1] menos horas [2] menos escalas
 	 */
 	// Calcula el camino mas corto
 	public List<PositionalList<Vertex<String>>> caminoMasCorto(Graph<String, VueloVo> g, String origen, String destino,
@@ -160,6 +159,36 @@ public class LogicaTipoBusqueda {
 		}
 		return listCaminos;
 	}
+	
+	
+	//-----------------------------------------------------TIPOS DE BUSQUEDA-----------------------------------------------------------	
+	/**
+	 * Este método calcula el camino mas corto de los aeropuertos mas economicos.
+	 * 
+	 * @param g recibe el grafo principal
+	 * @return Graph<String, Integer> retorna un grafo de tipo String,integer ya que
+	 *         Disktra trabaja solo con enteros.
+	 */
+	private Graph<String, Integer> masEconomico(Graph<String, VueloVo> grafos) {
+		// Crea un grafo con edge solo de entero para calcular el camino mas corto con
+		// dikstra
+		Graph<String, Integer> grafo = new AdjacencyMapGraph<>(false);
+		// Creo un Mapa con los vertices
+		Map<Vertex<String>, Vertex<String>> mapaVertice = new ProbeHashMap<>();
+		// recorre el grafo
+		for (Vertex<String> guardaVertice : grafos.vertices()) { // obtengo los vertices y los agrego al mapa
+			// vertice
+			mapaVertice.put(guardaVertice, grafo.insertVertex(guardaVertice.getElement()));
+		}
+		//
+		Vertex<String>[] vertice;
+		for (Edge<VueloVo> arco : grafos.edges()) { // recorre el grafo trayendo los arcos
+			vertice = grafos.endVertices(arco); // obtiene los vertice que estan en el extremo del arco
+			// inserta en el nuevo grafo el precio
+			grafo.insertEdge(mapaVertice.get(vertice[0]), mapaVertice.get(vertice[1]), arco.getElement().getPrecio());
+		}
+		return grafo;
+	}
 
 	/**
 	 * Este método calcula el camino mas corto de los aeropuerto con menos horas.
@@ -185,63 +214,33 @@ public class LogicaTipoBusqueda {
 			String[] parts1 = hora.split(":");
 			Integer tiempo_vuelo = Integer.parseInt(parts1[0] + parts1[1]);
 			vertice = grafos.endVertices(arco);
-			grafo.insertEdge(mapaVertice.get(vertice[0]), mapaVertice.get(vertice[1]), (tiempo_vuelo));// origen,
-																										// destino y
-																										// horario
+			grafo.insertEdge(mapaVertice.get(vertice[0]), mapaVertice.get(vertice[1]), (tiempo_vuelo));
 		}
 		return grafo;
 	}
 
 	/**
-	 * Este método calcula el camino mas corto de los aeropuertos mas economicos.
-	 * 
-	 * @param g recibe el grafo principal
-	 * @return Graph<String, Integer> retorna un grafo de tipo String,integer ya que
-	 *         Disktra trabaja solo con enteros.
-	 */
-	private Graph<String, Integer> masEconomico(Graph<String, VueloVo> grafos) {
-		// Crea un grafo con edge solo de entero para calcular el camino mas corto con
-		// dikstra
-		Graph<String, Integer> grafo = new AdjacencyMapGraph<>(false);
-		// Creo un Mapa con los vertices
-		Map<Vertex<String>, Vertex<String>> mapaVertice = new ProbeHashMap<>();
-		// recorre el grafo
-		for (Vertex<String> guardaVertice : grafos.vertices()) { // obtengo los vertices y los agrego al mapa
-			// vertice
-			mapaVertice.put(guardaVertice, grafo.insertVertex(guardaVertice.getElement()));
-		}
-		//
-		Vertex<String>[] vertice;
-
-		for (Edge<VueloVo> arco : grafos.edges()) { // recorre el grafo trayendo los arcos
-			vertice = grafos.endVertices(arco); // obtiene los vertice que estan en el extremo del arco
-			// inserta en el nuevo grafo el precio
-			grafo.insertEdge(mapaVertice.get(vertice[0]), mapaVertice.get(vertice[1]), arco.getElement().getPrecio());
-		}
-		return grafo;
-	}
-
-	/**
-	 * Este método calcula los 3 metodos (Economico, menos horas) y elige el que
-	 * posee menos escalas.
-	 * 
-	 * @param g    recibe el grafo principal
-	 * @param orig recibe el aeropuerto origen que el usuario eligio.
-	 * @param dest recibe el aeropuerto destino que el usuario eligio.
+	 * Este método retorna el que contiene menos escalas de los 2 tipos de busqueda
+	 * que se crearon con hilos 
+	 * @param economico recibe el calculo que se realizo primero con el hilo
+	 * @param horas recibe el calculo que se realizo segundo con el hilo
 	 * @return PositionalList<Vertex<String>> contiene los nodos que hacen el camino
 	 *         mas corto.
 	 */
 	private PositionalList<Vertex<String>> menosEscalas(PositionalList<Vertex<String>> economico,
 			PositionalList<Vertex<String>> horas) {
-
 		if (economico.size() > horas.size()) {
 			return horas;
 		}
 		return economico;
 	}
+	
+	//--------------------------------------------------------------------------------------------------------------------------
+	
+	//---------------------------OBTENGO LA BUSQUEDA PARA MOSTRAR LA INFORMACION EN LOS PANELES---------------------------------
 
 	/**
-	 * Este método separa el camino mas corto en 3 partes, los nombres por un lado,
+	 * Este método separa el camino mas corto en 4 partes, la fecha, los nombres por un lado,
 	 * la información por otro y por último los totales(precio y cantidad de hora).
 	 * 
 	 * @param grafo        recibe el grafo principal

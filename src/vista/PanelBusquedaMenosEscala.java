@@ -259,6 +259,10 @@ public class PanelBusquedaMenosEscala extends JPanel implements ActionListener{
 		panel.add(lblFondoPantalla);
 		
 	}
+	public void setCoordinador(Coordinador coordinador) {
+		this.coordinador = coordinador;
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource()==btnVolver){			

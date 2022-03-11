@@ -47,7 +47,7 @@ public class VueloDao {
 			estatuto.executeUpdate(
 					"INSERT INTO vuelo(numero_vuelo,fecha,precio,aeropuerto_origen,aeropuerto_destino,tiempo_vuelo,demora) VALUES ('"
 							+ vuelo.getNumero_vuelo() + "', '" + vuelo.getFecha() + "', '" + vuelo.getPrecio() + "', '"
-							+ vuelo.getAeropuerto_origen() + "', '" + vuelo.getAeropuerto_destino() + "', '"
+							+ vuelo.getAeropuerto_origen().getAbreviacion() + "', '" + vuelo.getAeropuerto_destino().getAbreviacion() + "', '"
 							+ vuelo.getTiempo_vuelo() + "', '" + vuelo.getDemora() + "')");
 			JOptionPane.showMessageDialog(null, "Se ha registrado Exitosamente", "Información",
 					JOptionPane.INFORMATION_MESSAGE);

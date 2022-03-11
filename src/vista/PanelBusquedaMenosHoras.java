@@ -261,6 +261,10 @@ public class PanelBusquedaMenosHoras extends JPanel implements ActionListener {
 		
 	}
 
+	public void setCoordinador(Coordinador coordinador) {
+		this.coordinador = coordinador;
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource()==btnVolver){			
